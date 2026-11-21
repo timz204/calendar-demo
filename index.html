@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interview Schedule Calendar</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f8fafd;
+    color: #202124;
+}
+
+.app-layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    min-height: calc(100vh - 70px);
+}
+
+.user-sidebar {
+    background: white;
+    border-right: 1px solid #dadce0;
+    padding: 18px 14px;
+    height: calc(100vh - 70px);
+    position: sticky;
+    top: 70px;
+    overflow-y: auto;
+}
+
+.user-sidebar h3 {
+    margin: 0 0 12px;
+    padding: 0 4px;
+}
+
+.user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.user-item {
+    width: 100%;
+    text-align: left;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #e4e7eb;
+    background: #fff;
+}
+
+.user-item:hover {
+    background: #f8fafd;
+}
+
+.user-item-name {
+    display: block;
+    font-weight: 600;
+    color: #202124;
+    overflow-wrap: anywhere;
+}
+
+.user-item-email {
+    display: block;
+    margin-top: 4px;
+    color: #5f6368;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.user-status {
+    display: inline-block;
+    margin-top: 7px;
+    padding: 3px 7px;
+    border-radius: 999px;
+    background: #e8f0fe;
+    color: #1967d2;
+    font-size: 11px;
+}
+
+.user-status.unscheduled {
+    background: #f1f3f4;
+    color: #5f6368;
+}
+
+header {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    padding: 0 25px;
+    border-bottom: 1px solid #dadce0;
+    background: white;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+}
+
+.logo {
+    font-size: 21px;
+    font-weight: 600;
+    color: #4285f4;
+}
+
+header button, button {
+    cursor: pointer;
+    border: 1px solid #dadce0;
+    background: white;
+    padding: 10px 16px;
+    border-radius: 7px;
+    font-size: 14px;
+}
+
+header button:hover, button:hover {
+    background: #f1f3f4;
+}
+
+.month-title {
+    font-size: 22px;
+    font-weight: 500;
+    min-width: 190px;
+}
+
+.container {
+    padding: 22px;
+    max-width: 1600px;
+    margin: auto;
+    width: 100%;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.toolbar .spacer {
+    flex: 1;
+}
+
+.primary {
+    background: #1a73e8;
+    color: white;
+    border: none;
+}
+
+.primary:hover {
+    background: #1765cc;
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    border-top: 1px solid #dadce0;
+    border-left: 1px solid #dadce0;
+    background: white;
+    width: 100%;
+    overflow: hidden;
+}
+
+.weekday {
+    text-align: center;
+    padding: 14px 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #5f6368;
+    border-right: 1px solid #dadce0;
+    border-bottom: 1px solid #dadce0;
+}
+
+.day {
+    min-height: 125px;
+    padding: 8px;
+    border-right: 1px solid #dadce0;
+    border-bottom: 1px solid #dadce0;
+    position: relative;
+    min-width: 0;
+}
+
+.day.other-month {
+    background: #f8fafd;
+    color: #a0a0a0;
+}
+
+.day.today {
+    background: #f0f6ff;
+}
+
+.day-number {
+    font-size: 13px;
+    margin-bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+}
+
+.today .day-number {
+    background: #1a73e8;
+    color: white;
+}
+
+.event {
+    background: #d2e3fc;
+    border-left: 3px solid #4285f4;
+    color: #174ea6;
+    padding: 6px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.event:hover {
+    background: #b8d3fa;
+}
+
+.event-time {
+    font-weight: bold;
+}
+
+.event-name {
+    margin-top: 3px;
+}
+
+.empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #777;
+}
+
+.panel {
+    background: white;
+    border: 1px solid #dadce0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 25px;
+}
+
+.panel h3 {
+    margin-top: 0;
+}
+
+textarea,
+input,
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #dadce0;
+    border-radius: 7px;
+    font-family: inherit;
+}
+
+textarea {
+    min-height: 180px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.form-grid label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.form-grid label span {
+    display: block;
+    margin-bottom: 6px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.danger {
+    color: #d93025;
+    border-color: #d93025;
+}
+
+.status {
+    margin-top: 12px;
+    font-size: 13px;
+}
+
+.success {
+    color: #188038;
+}
+
+.error {
+    color: #d93025;
+}
+
+.warning {
+    color: #b06000;
+}
+
+.details {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    z-index: 10;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+}
+
+.details-content {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 450px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.details-content h2 {
+    margin-top: 0;
+}
+
+.details-content p {
+    overflow-wrap: anywhere;
+    font-size: 14px;
+}
+
+.details-content a {
+    color: #1a73e8;
+}
+
+.close {
+    float: right;
+    border: none;
+    font-size: 20px;
+    padding: 0 8px;
+}
+
+.schedule-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: rgba(32, 33, 36, .45);
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+}
+
+.schedule-modal-content {
+    width: 100%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: 0;
+    background: white;
+}
+
+.schedule-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.schedule-modal-header h3 {
+    margin: 0;
+}
+
+.mini-calendar-panel {
+    border-bottom: 1px solid #e4e7eb;
+    margin: 0 0 16px;
+    padding: 0 2px 16px;
+}
+
+.mini-calendar-header {
+    display: grid;
+    grid-template-columns: 28px 1fr 28px;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.mini-calendar-header button {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+}
+
+.mini-month-title {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.mini-calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.mini-weekday,
+.mini-day {
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+}
+
+.mini-weekday {
+    color: #5f6368;
+    font-weight: 600;
+}
+
+button.mini-day {
+    width: 100%;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+}
+
+button.mini-day.free:hover {
+    background: #e8f0fe;
+    border-color: #4285f4;
+}
+
+button.mini-day.booked {
+    background: #f1f3f4;
+    color: #9aa0a6;
+    cursor: not-allowed;
+}
+
+button.mini-day.today {
+    border-color: #1a73e8;
+    color: #1a73e8;
+    font-weight: bold;
+}
+
+button.mini-day.other-month {
+    color: #bdc1c6;
+}
+
+/* Layout fixes */
+header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+}
+
+.app-layout {
+    width: 100%;
+    grid-template-columns: 280px minmax(0, 1fr);
+}
+
+.user-sidebar {
+    min-width: 280px;
+}
+
+.calendar-main,
+.app-layout > .container {
+    width: 100%;
+    min-width: 0;
+}
+
+.container {
+    max-width: none;
+    width: 100%;
+}
+
+.calendar {
+    width: 100%;
+    overflow: hidden;
+}
+
+.day {
+    min-width: 0;
+}
+
+.user-list .empty {
+    padding: 20px 8px;
+}
+
+.schedule-modal-content {
+    background: white;
+}
+
+/* Final visibility fixes */
+.app-layout {
+    display: grid !important;
+    grid-template-columns: 300px minmax(600px, 1fr) !important;
+    align-items: start;
+    width: 100%;
+}
+
+.user-sidebar {
+    display: block !important;
+    visibility: visible !important;
+    width: 300px !important;
+    min-width: 300px !important;
+    height: calc(100vh - 70px) !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+}
+
+.app-layout > .container {
+    display: block !important;
+    width: 100% !important;
+    min-width: 600px;
+}
+
+.calendar {
+    display: grid !important;
+    width: 100% !important;
+}
+
+.user-list {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+@media(max-width: 900px) {
+    .app-layout {
+        grid-template-columns: 220px minmax(600px, 1fr) !important;
+        overflow-x: auto;
+    }
+
+    .user-sidebar {
+        width: 220px !important;
+        min-width: 220px !important;
+    }
+}
+
+@media(max-width: 700px) {
+    .app-layout {
+        display: block !important;
+        overflow: visible;
+    }
+
+    .user-sidebar {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+    }
+
+    .app-layout > .container {
+        min-width: 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">▦ Calendar</div>
+    <button onclick="goToday()">Today</button>
+    <button onclick="changeMonth(-1)">‹</button>
+    <button onclick="changeMonth(1)">›</button>
+    <div class="month-title" id="monthTitle"></div>
+</header>
+
+<div class="app-layout">
+
+    <div class="user-sidebar">
+        <div class="mini-calendar-panel">
+            <div class="mini-calendar-header">
+                <button type="button" onclick="changeMiniMonth(-1)">‹</button>
+                <div class="mini-month-title" id="miniMonthTitle"></div>
+                <button type="button" onclick="changeMiniMonth(1)">›</button>
+            </div>
+            <div class="mini-calendar" id="miniCalendar"></div>
+        </div>
+
+        <h3>Contacts</h3>
+        <div class="user-list" id="userList"></div>
+    </div>
+
+    <div class="container">
+
+        <div class="toolbar">
+            <button onclick="goToday()">Today</button>
+            <div class="spacer"></div>
+            <button onclick="exportJSON()">Export JSON</button>
+            <button class="primary" onclick="openScheduleForm()">New Schedule</button>
+        </div>
+
+        <div class="calendar" id="calendar"></div>
+
+        <div id="status" class="status"></div>
+
+        <div class="panel">
+            <h3>Schedule Summary</h3>
+            <div id="summary"></div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="details" id="details" onclick="closeDetails(event)">
+    <div class="details-content">
+        <button class="close" onclick="hideDetails()">×</button>
+        <div id="detailsBody"></div>
+    </div>
+</div>
+
+<div class="schedule-modal" id="scheduleModal" onclick="closeScheduleModal(event)">
+        <div class="panel schedule-modal-content" id="schedulePanel">
+            <div class="schedule-modal-header">
+                <h3 id="scheduleFormTitle">Create Schedule</h3>
+                <button class="close" type="button" onclick="closeScheduleForm()">×</button>
+            </div>
+            <input type="hidden" id="scheduleId">
+            <div class="form-grid">
+                <label><span>Name</span><input id="scheduleName" required></label>
+                <label><span>Email</span><input id="scheduleEmail" type="email"></label>
+                <label><span>Country</span><input id="scheduleCountry" placeholder="Japan"></label>
+                <label><span>Date</span><input id="scheduleDate" type="date"></label>
+                <label><span>Time</span><input id="scheduleTime" type="time"></label>
+                <label><span>Timezone</span><input id="scheduleTimezone" placeholder="Asia/Tokyo"></label>
+                <label><span>Phone</span><input id="schedulePhone"></label>
+                <label><span>LinkedIn</span><input id="scheduleLinkedin" type="url"></label>
+                <label><span>GitHub</span><input id="scheduleGithub" type="url"></label>
+                <label><span>Meeting Link</span><input id="scheduleMeetingLink" type="url"></label>
+                <label><span>Meeting Password</span><input id="scheduleMeetingPassword"></label>
+            </div>
+            <div class="form-actions">
+                <button type="button" onclick="closeScheduleForm()">Cancel</button>
+                <button type="button" class="primary" onclick="saveSchedule()">Save</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+// All contacts are retained here.
+// No LocalStorage or database is used.
+
+let contacts = [
+    {
+        "id": 1,
+        "name": "Banlon Jones",
+        "email": "banlonjones@gmail.com",
+        "linkedin": "https://www.linkedin.com/in/banlon-jones",
+        "github": "https://github.com/banlon-jones",
+        "date": "2026-11-20",
+        "time": "09:00",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/87476324624?pwd=M8yMBH04Zk4db0IISmbfZdzQSbGVCk.1",
+        "meeting_password": "U30mJF"
+    },
+    {
+        "id": 2,
+        "name": "Pujan Gautam",
+        "email": "mepujan10@gmail.com",
+        "linkedin": "https://www.linkedin.com/in/pujangautam/",
+        "github": "https://github.com/mepujan",
+        "date": null,
+        "time": null,
+        "timezone": null,
+        "meeting_link": null,
+        "meeting_password": null
+    },
+    {
+        "id": 3,
+        "name": "Riya Chodha",
+        "email": "chodhariya100@gmail.com",
+        "linkedin": "https://www.linkedin.com/in/riya-chodha-093728a6",
+        "github": "https://github.com/riyachodha",
+        "date": "2026-11-20",
+        "time": "16:00",
+        "timezone": "Asia/Tokyo",
+        "phone": "+1 312-940-7341"
+    },
+    {
+        "id": 4,
+        "name": "Josh Reese",
+        "email": "joshgarlandreese@gmail.com",
+        "linkedin": "https://www.linkedin.com/in/joshgarlandreese/",
+        "github": "https://github.com/joshgarlandreese",
+        "date": null,
+        "time": null,
+        "timezone": null
+    },
+    {
+        "id": 5,
+        "name": "Jeeshaan Singh Bakshi",
+        "email": "jeeshaanbakshi@gmail.com",
+        "linkedin": "https://www.linkedin.com/in/jeeshaan-bakshi-01a8a2229/",
+        "github": "https://github.com/JeeshaanBakshi",
+        "date": "2026-11-23",
+        "time": "15:00",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/85161405001?pwd=buqq5Yc0ZMrZCiAtKHQu7FkBUblNUm.1",
+        "meeting_password": "411QGG"
+    },
+    {
+        "id": 6,
+        "name": "Benjamin Granados",
+        "email": "benjamingranados@outlook.com",
+        "linkedin": "https://www.linkedin.com/in/benjamingranados/",
+        "github": "https://github.com/benjamingranados",
+        "date": "2026-11-20",
+        "time": "18:00",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/88192079428?pwd=auL4f1IWqLVRbRiOs2t28BW5Xd3SDP.1",
+        "meeting_password": "8q45Tk"
+    },
+    {
+        "id": 7,
+        "name": "Raul Figueroa",
+        "email": "rfigueroa17@hotmail.com",
+        "linkedin": "https://www.linkedin.com/in/luis-raul-figueroa-soto-63411118a/",
+        "github": "https://github.com/tacodtripe",
+        "date": "2026-11-21",
+        "time": "10:00",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/84443260007?pwd=35obcugSL2txaT2uu0uhKNSaKIqEA7.1",
+        "meeting_password": "g7cixb"
+    },
+    {
+        "id": 8,
+        "name": "Mazen Khan",
+        "email": "mk4124@hw.ac.uk",
+        "linkedin": "https://www.linkedin.com/in/mazen-khan/",
+        "github": "https://github.com/0xcr4cx",
+        "date": null,
+        "time": null,
+        "timezone": null
+    },
+    {
+        "id": 9,
+        "name": "Genesis Lianna Mpangu",
+        "email": "genesisliannamp@outlook.com",
+        "linkedin": null,
+        "github": "https://github.com/genesislianna123",
+        "date": null,
+        "time": null,
+        "timezone": null
+    },
+    {
+        "id": 10,
+        "name": "Andy Zamorano",
+        "email": "andres_zamorano_@hotmail.com",
+        "linkedin": "https://www.linkedin.com/in/andres-zamorano-785b77a1/",
+        "github": "https://github.com/Dachrono",
+        "date": null,
+        "time": null,
+        "timezone": null
+    },
+    {
+        "id": 11,
+        "name": "Dishant Patel",
+        "email": "dishantpatel27@gmail.com",
+        "linkedin": "https://www.linkedin.com/in/dishantpatel27/",
+        "github": "https://github.com/dishantpatel27",
+        "date": null,
+        "time": null,
+        "timezone": null
+    },
+    {
+        "id": 12,
+        "name": "Nausher Rao",
+        "email": "nausher@sherrao.tech",
+        "linkedin": "https://linkedin.com/in/nausherrao",
+        "github": "https://github.com/SherRao",
+        "date": "2026-11-21",
+        "time": "15:30",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/85199057841?pwd=SobPTb1Xq8WuoopoXraZDprnRRhzOk.1",
+        "meeting_password": "4S16JN"
+    },
+    {
+        "id": 13,
+        "name": "Tiegan Benson",
+        "email": "tiegan@sagirisdev.com",
+        "linkedin": null,
+        "github": "https://github.com/SagirisWebDev",
+        "date": "2026-11-24",
+        "time": "09:00",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/82921504820?pwd=1DYxQczginCdD0CrXZ09tJPQSbdPnF.1",
+        "meeting_password": "T2T3r6"
+    },
+    {
+        "id": 14,
+        "name": "Michael Ogunjimi",
+        "email": "michael_ogunjimi@yahoo.com",
+        "linkedin": "https://linkedin.com/in/michaelogunjimi/",
+        "github": "https://github.com/MichaelOgunjimi",
+        "date": "2026-11-24",
+        "time": "10:00",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/83363481787?pwd=EWWl9LQdRvh2DYSjTqbxBpst6Yl8Yf.1",
+        "meeting_password": "9SrARC"
+    },
+    {
+        "id": 15,
+        "name": "Carson Chittom",
+        "email": "carson@chittom.family",
+        "linkedin": null,
+        "github": "https://github.com/cmchittom",
+        "date": null,
+        "time": null,
+        "timezone": null
+    }
+];
+
+let currentDate = new Date(2026, 10, 1);
+let miniCalendarDate = new Date(2026, 10, 1);
+
+async function loadMeetingsFromServer() {
+    try {
+        const response = await fetch("/api/meetings", {
+            cache: "no-store",
+            headers: { "Accept": "application/json" }
+        });
+        if (!response.ok) throw new Error("Unable to load meetings from server.");
+
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error("meetings.json must contain a JSON array.");
+
+        contacts = data;
+
+        renderCalendar();
+        renderUserList();
+        renderMiniCalendar();
+        showStatus(`Automatically loaded ${contacts.length} contacts from meetings.json.`, "success");
+    } catch (error) {
+        showStatus("Auto import failed: " + error.message, "error");
+    }
+}
+
+function validDate(dateString) {
+    if (typeof dateString !== "string" ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        return false;
+    }
+
+    const [year, month, day] = dateString.split("-").map(Number);
+
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    return date.getUTCFullYear() === year &&
+           date.getUTCMonth() === month - 1 &&
+           date.getUTCDate() === day;
+}
+
+function validTime(time) {
+    return typeof time === "string" &&
+           /^([01]\d|2[0-3]):[0-5]\d$/.test(time);
+}
+
+function getScheduledEvents() {
+    return contacts.filter(person =>
+        validDate(person.date) &&
+        validTime(person.time)
+    );
+}
+
+function renderUserList() {
+    const list = document.getElementById("userList");
+    list.replaceChildren();
+
+    if (contacts.length === 0) {
+        const empty = document.createElement("p");
+        empty.className = "empty";
+        empty.textContent = "No users found";
+        list.appendChild(empty);
+        return;
+    }
+
+    contacts.forEach(person => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "user-item";
+
+        const name = document.createElement("span");
+        name.className = "user-item-name";
+        name.textContent = person.name || "Unnamed user";
+
+        const email = document.createElement("span");
+        email.className = "user-item-email";
+        email.textContent = person.email || "No email";
+
+        const status = document.createElement("span");
+        status.className = "user-status";
+        const isScheduled = validDate(person.date) && validTime(person.time);
+        status.textContent = isScheduled
+            ? `${person.date} · ${formatTime(person.time)}`
+            : "Unscheduled";
+        if (!isScheduled) status.classList.add("unscheduled");
+
+        button.append(name, email, status);
+        button.onclick = () => {
+            if (isScheduled) {
+                showDetails(person);
+            } else {
+                openScheduleForm(person);
+            }
+        };
+
+        list.appendChild(button);
+    });
+}
+
+function renderCalendar() {
+    const calendar = document.getElementById("calendar");
+
+    calendar.innerHTML = "";
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    document.getElementById("monthTitle").textContent =
+        currentDate.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric"
+        });
+
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    weekdays.forEach(day => {
+        const element = document.createElement("div");
+        element.className = "weekday";
+        element.textContent = day;
+        calendar.appendChild(element);
+    });
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const previousMonthDays = new Date(year, month, 0).getDate();
+
+    const today = new Date();
+
+    for (let i = 0; i < 42; i++) {
+        let dayNumber;
+        let cellDate;
+        let otherMonth = false;
+
+        if (i < firstDay) {
+            dayNumber = previousMonthDays - firstDay + i + 1;
+            cellDate = new Date(year, month - 1, dayNumber);
+            otherMonth = true;
+        } else if (i >= firstDay + daysInMonth) {
+            dayNumber = i - firstDay - daysInMonth + 1;
+            cellDate = new Date(year, month + 1, dayNumber);
+            otherMonth = true;
+        } else {
+            dayNumber = i - firstDay + 1;
+            cellDate = new Date(year, month, dayNumber);
+        }
+
+        const dateKey =
+            `${cellDate.getFullYear()}-${String(cellDate.getMonth()+1).padStart(2,"0")}-${String(cellDate.getDate()).padStart(2,"0")}`;
+
+        const cell = document.createElement("div");
+        cell.className = "day";
+
+        if (otherMonth) cell.classList.add("other-month");
+
+        if (
+            cellDate.getFullYear() === today.getFullYear() &&
+            cellDate.getMonth() === today.getMonth() &&
+            cellDate.getDate() === today.getDate()
+        ) {
+            cell.classList.add("today");
+        }
+
+        const number = document.createElement("div");
+        number.className = "day-number";
+        number.textContent = dayNumber;
+        cell.appendChild(number);
+
+        const dayEvents = getScheduledEvents()
+            .filter(event => event.date === dateKey)
+            .sort((a, b) => a.time.localeCompare(b.time));
+
+        dayEvents.forEach(event => {
+            const eventElement = document.createElement("div");
+            eventElement.className = "event";
+
+            const time = document.createElement("div");
+            time.className = "event-time";
+            time.textContent = formatTime(event.time);
+
+            const name = document.createElement("div");
+            name.className = "event-name";
+            name.textContent = event.name || "Unnamed event";
+
+            eventElement.append(time, name);
+
+            eventElement.onclick = () => showDetails(event);
+
+            cell.appendChild(eventElement);
+        });
+
+        calendar.appendChild(cell);
+    }
+
+    renderSummary();
+    renderUserList();
+    renderMiniCalendar();
+}
+
+function changeMonth(amount) {
+    currentDate.setMonth(currentDate.getMonth() + amount);
+    miniCalendarDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    renderCalendar();
+}
+
+function goToday() {
+    currentDate = new Date();
+    currentDate.setDate(1);
+    miniCalendarDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    renderCalendar();
+}
+
+function showDetails(event) {
+    const body = document.getElementById("detailsBody");
+
+    body.replaceChildren();
+
+    const heading = document.createElement("h2");
+    heading.textContent = event.name || "Meeting";
+    body.appendChild(heading);
+
+    function addText(label, value) {
+        if (value === undefined || value === null || value === "") return;
+
+        const p = document.createElement("p");
+        const strong = document.createElement("strong");
+        strong.textContent = label + ": ";
+
+        p.append(strong, document.createTextNode(String(value)));
+        body.appendChild(p);
+    }
+
+    addText("Email", event.email);
+    addText("Country", event.country);
+    addText("Date", event.date);
+    addText("Time", formatTime(event.time));
+    addText("Timezone", event.timezone);
+    addText("Phone", event.phone);
+    addText("Meeting Password", event.meeting_password);
+
+    ["linkedin", "github", "meeting_link"].forEach(key => {
+        if (!event[key]) return;
+
+        const p = document.createElement("p");
+        const a = document.createElement("a");
+
+        a.href = event[key];
+        a.textContent = key === "meeting_link"
+            ? "Join Meeting"
+            : key.charAt(0).toUpperCase() + key.slice(1);
+
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+
+        p.appendChild(a);
+        body.appendChild(p);
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "form-actions";
+
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+    editButton.onclick = () => openScheduleForm(event);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.className = "danger";
+    deleteButton.onclick = () => deleteSchedule(event.id);
+
+    actions.append(editButton, deleteButton);
+    body.appendChild(actions);
+
+    document.getElementById("details").style.display = "flex";
+}
+
+function hideDetails() {
+    document.getElementById("details").style.display = "none";
+}
+
+function closeDetails(event) {
+    if (event.target.id === "details") hideDetails();
+}
+
+function renderSummary() {
+    const scheduled = getScheduledEvents();
+
+    const summary = document.getElementById("summary");
+
+    summary.innerHTML = `
+        <p>Total contacts: <strong>${contacts.length}</strong></p>
+        <p>Scheduled meetings: <strong>${scheduled.length}</strong></p>
+        <p>Unscheduled contacts: <strong>${contacts.length - scheduled.length}</strong></p>
+    `;
+}
+
+function showStatus(message, type) {
+    const status = document.getElementById("status");
+    if (!status) return;
+
+    status.className = "status " + type;
+    status.textContent = message;
+}
+
+function exportJSON() {
+    const blob = new Blob(
+        [JSON.stringify(contacts, null, 2)],
+        { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "interview-schedules.json";
+
+    link.click();
+
+    URL.revokeObjectURL(url);
+}
+
+async function openScheduleForm(meeting = null) {
+    document.getElementById("scheduleModal").style.display = "flex";
+    document.body.style.overflow = "hidden";
+    document.getElementById("scheduleFormTitle").textContent = meeting ? "Edit Schedule" : "Create Schedule";
+
+    document.getElementById("scheduleId").value = meeting?.id ?? "";
+    document.getElementById("scheduleName").value = meeting?.name ?? "";
+    document.getElementById("scheduleEmail").value = meeting?.email ?? "";
+    document.getElementById("scheduleCountry").value = meeting?.country ?? "";
+    document.getElementById("scheduleDate").value = meeting?.date ?? "";
+    document.getElementById("scheduleTime").value = meeting?.time ?? "";
+    document.getElementById("scheduleTimezone").value = meeting?.timezone ?? "";
+    document.getElementById("schedulePhone").value = meeting?.phone ?? "";
+    document.getElementById("scheduleLinkedin").value = meeting?.linkedin ?? "";
+    document.getElementById("scheduleGithub").value = meeting?.github ?? "";
+    document.getElementById("scheduleMeetingLink").value = meeting?.meeting_link ?? "";
+    document.getElementById("scheduleMeetingPassword").value = meeting?.meeting_password ?? "";
+
+    setTimeout(() => document.getElementById("scheduleName").focus(), 0);
+}
+
+function closeScheduleForm() {
+    document.getElementById("scheduleModal").style.display = "none";
+    document.body.style.overflow = "";
+}
+
+function closeScheduleModal(event) {
+    if (event.target.id === "scheduleModal") closeScheduleForm();
+}
+
+async function saveSchedule() {
+    const id = document.getElementById("scheduleId").value;
+    const meeting = {
+        name: document.getElementById("scheduleName").value.trim(),
+        email: document.getElementById("scheduleEmail").value.trim() || null,
+        country: document.getElementById("scheduleCountry").value.trim() || null,
+        date: document.getElementById("scheduleDate").value || null,
+        time: document.getElementById("scheduleTime").value || null,
+        timezone: document.getElementById("scheduleTimezone").value.trim() || null,
+        phone: document.getElementById("schedulePhone").value.trim() || null,
+        linkedin: document.getElementById("scheduleLinkedin").value.trim() || null,
+        github: document.getElementById("scheduleGithub").value.trim() || null,
+        meeting_link: document.getElementById("scheduleMeetingLink").value.trim() || null,
+        meeting_password: document.getElementById("scheduleMeetingPassword").value.trim() || null
+    };
+
+    if (!meeting.name) {
+        showStatus("Name is required.", "error");
+        return;
+    }
+
+    try {
+        const response = await fetch(id ? `/api/meetings/${id}` : "/api/meetings", {
+            method: id ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(meeting)
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Unable to save schedule.");
+
+        closeScheduleForm();
+        hideDetails();
+        await loadMeetingsFromServer();
+        showStatus(id ? "Schedule updated." : "Schedule created.", "success");
+    } catch (error) {
+        showStatus(error.message, "error");
+    }
+}
+
+async function deleteSchedule(id) {
+    if (!confirm("Delete this schedule?")) return;
+
+    try {
+        const response = await fetch(`/api/meetings/${id}`, { method: "DELETE" });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Unable to delete schedule.");
+
+        hideDetails();
+        await loadMeetingsFromServer();
+        showStatus("Schedule deleted.", "success");
+    } catch (error) {
+        showStatus(error.message, "error");
+    }
+}
+
+// Render immediately from the built-in data, then refresh from meetings.json.
+renderCalendar();
+renderUserList();
+renderMiniCalendar();
+loadMeetingsFromServer();
+
+document.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+        closeScheduleForm();
+        hideDetails();
+    }
+});
+
+function changeMiniMonth(amount) {
+    miniCalendarDate.setMonth(miniCalendarDate.getMonth() + amount);
+    renderMiniCalendar();
+}
+
+function getDateKey(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function isDateBooked(dateKey) {
+    return getScheduledEvents().some(event => event.date === dateKey);
+}
+
+function selectFreeDate(dateKey) {
+    currentDate = new Date(dateKey + "T00:00:00");
+    currentDate.setDate(1);
+    renderCalendar();
+
+    openScheduleForm();
+    document.getElementById("scheduleDate").value = dateKey;
+}
+
+function renderMiniCalendar() {
+    const calendar = document.getElementById("miniCalendar");
+    if (!calendar) return;
+
+    calendar.innerHTML = "";
+
+    const year = miniCalendarDate.getFullYear();
+    const month = miniCalendarDate.getMonth();
+
+    document.getElementById("miniMonthTitle").textContent =
+        miniCalendarDate.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+
+    ["S", "M", "T", "W", "T", "F", "S"].forEach(day => {
+        const weekday = document.createElement("div");
+        weekday.className = "mini-weekday";
+        weekday.textContent = day;
+        calendar.appendChild(weekday);
+    });
+
+    const firstDay = new Date(year, month, 1);
+    const gridStart = new Date(year, month, 1 - firstDay.getDay());
+    const today = new Date();
+
+    for (let i = 0; i < 42; i++) {
+        const date = new Date(gridStart);
+        date.setDate(gridStart.getDate() + i);
+
+        const dateKey = getDateKey(date);
+        const booked = isDateBooked(dateKey);
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `mini-day ${booked ? "booked" : "free"}`;
+        button.textContent = date.getDate();
+
+        if (date.getMonth() !== month) button.classList.add("other-month");
+        if (getDateKey(today) === dateKey) button.classList.add("today");
+
+        if (booked) {
+            button.disabled = true;
+            button.title = "This date already has meetings";
+        } else {
+            button.title = `Select free date ${dateKey}`;
+            button.onclick = () => selectFreeDate(dateKey);
+        }
+
+        calendar.appendChild(button);
+    }
+}
+
+function formatTime(time) {
+    if (!validTime(time)) return "";
+
+    const [hour, minute] = time.split(":").map(Number);
+    const suffix = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12;
+
+    return `${String(formattedHour).padStart(2, "0")}:${String(minute).padStart(2, "0")} ${suffix}`;
+}
+</script>
+
+</body>
+</html>

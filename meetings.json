@@ -9,7 +9,9 @@
     "time": "09:00",
     "timezone": "Asia/Tokyo",
     "meeting_link": "https://us05web.zoom.us/j/87476324624?pwd=M8yMBH04Zk4db0IISmbfZdzQSbGVCk.1",
-    "meeting_password": "U30mJF"
+    "meeting_password": "U30mJF",
+    "country": "Canada",
+    "phone": null
   },
   {
     "id": 2,
@@ -19,9 +21,11 @@
     "github": "https://github.com/mepujan",
     "date": null,
     "time": null,
-    "timezone": "Asia/Tokyo",
+    "timezone": null,
     "meeting_link": null,
-    "meeting_password": null
+    "meeting_password": null,
+    "country": "Canada",
+    "phone": null
   },
   {
     "id": 3,
@@ -33,6 +37,7 @@
     "time": "16:00",
     "timezone": "Asia/Tokyo",
     "phone": "+1 312-940-7341",
+    "country": "Canada",
     "meeting_link": null,
     "meeting_password": null
   },
@@ -44,7 +49,9 @@
     "github": "https://github.com/joshgarlandreese",
     "date": null,
     "time": null,
-    "timezone": "Asia/Tokyo",
+    "timezone": null,
+    "country": "Texas, US",
+    "phone": null,
     "meeting_link": null,
     "meeting_password": null
   },
@@ -58,7 +65,9 @@
     "time": "15:00",
     "timezone": "Asia/Tokyo",
     "meeting_link": "https://us05web.zoom.us/j/85161405001?pwd=buqq5Yc0ZMrZCiAtKHQu7FkBUblNUm.1",
-    "meeting_password": "411QGG"
+    "meeting_password": "411QGG",
+    "country": "Canada",
+    "phone": null
   },
   {
     "id": 6,
@@ -70,7 +79,9 @@
     "time": "18:00",
     "timezone": "Asia/Tokyo",
     "meeting_link": "https://us05web.zoom.us/j/88192079428?pwd=auL4f1IWqLVRbRiOs2t28BW5Xd3SDP.1",
-    "meeting_password": "8q45Tk"
+    "meeting_password": "8q45Tk",
+    "country": "Mexico",
+    "phone": null
   },
   {
     "id": 7,
@@ -82,7 +93,9 @@
     "time": "10:00",
     "timezone": "Asia/Tokyo",
     "meeting_link": "https://us05web.zoom.us/j/84443260007?pwd=35obcugSL2txaT2uu0uhKNSaKIqEA7.1",
-    "meeting_password": "g7cixb"
+    "meeting_password": "g7cixb",
+    "country": "Mexico",
+    "phone": null
   },
   {
     "id": 8,
@@ -92,7 +105,9 @@
     "github": "https://github.com/0xcr4cx",
     "date": null,
     "time": null,
-    "timezone": "Asia/Tokyo",
+    "timezone": null,
+    "country": "UK",
+    "phone": null,
     "meeting_link": null,
     "meeting_password": null
   },
@@ -104,7 +119,9 @@
     "github": "https://github.com/genesislianna123",
     "date": null,
     "time": null,
-    "timezone": "Asia/Tokyo",
+    "timezone": null,
+    "country": "UK",
+    "phone": null,
     "meeting_link": null,
     "meeting_password": null
   },
@@ -116,7 +133,9 @@
     "github": "https://github.com/Dachrono",
     "date": null,
     "time": null,
-    "timezone": "Asia/Tokyo",
+    "timezone": null,
+    "country": "Mexico",
+    "phone": null,
     "meeting_link": null,
     "meeting_password": null
   },
@@ -128,7 +147,9 @@
     "github": "https://github.com/dishantpatel27",
     "date": null,
     "time": null,
-    "timezone": "Asia/Tokyo",
+    "timezone": null,
+    "country": "Canada",
+    "phone": null,
     "meeting_link": null,
     "meeting_password": null
   },
@@ -138,11 +159,13 @@
     "email": "nausher@sherrao.tech",
     "linkedin": "https://linkedin.com/in/nausherrao",
     "github": "https://github.com/SherRao",
-    "date": "2026-11-21",
-    "time": "15:30",
+    "date": "2026-11-22",
+    "time": "09:00",
     "timezone": "Asia/Tokyo",
     "meeting_link": "https://us05web.zoom.us/j/85199057841?pwd=SobPTb1Xq8WuoopoXraZDprnRRhzOk.1",
-    "meeting_password": "4S16JN"
+    "meeting_password": "4S16JN",
+    "country": "Canada",
+    "phone": null
   },
   {
     "id": 13,
@@ -154,7 +177,9 @@
     "time": "09:00",
     "timezone": "Asia/Tokyo",
     "meeting_link": "https://us05web.zoom.us/j/82921504820?pwd=1DYxQczginCdD0CrXZ09tJPQSbdPnF.1",
-    "meeting_password": "T2T3r6"
+    "meeting_password": "T2T3r6",
+    "country": "Canada",
+    "phone": null
   },
   {
     "id": 14,
@@ -166,7 +191,9 @@
     "time": "10:00",
     "timezone": "Asia/Tokyo",
     "meeting_link": "https://us05web.zoom.us/j/83363481787?pwd=EWWl9LQdRvh2DYSjTqbxBpst6Yl8Yf.1",
-    "meeting_password": "9SrARC"
+    "meeting_password": "9SrARC",
+    "country": "UK",
+    "phone": null
   },
   {
     "id": 15,
@@ -176,7 +203,9 @@
     "github": "https://github.com/cmchittom",
     "date": null,
     "time": null,
-    "timezone": "Asia/Tokyo",
+    "timezone": null,
+    "country": "Mississippi, US",
+    "phone": null,
     "meeting_link": null,
     "meeting_password": null
   },
@@ -184,12 +213,28 @@
     "id": 16,
     "name": "Raymond Fernandes",
     "email": "rayferns@hotmail.com",
-    "linkedin": "https://www.linkedin.com/in/raymondfernandes",
-    "github": "https://github.com/cmchittom",
+    "country": null,
     "date": "2026-11-23",
     "time": "19:00",
     "timezone": "Asia/Tokyo",
+    "phone": null,
+    "linkedin": "https://www.linkedin.com/in/Raymond Fernandes",
+    "github": "https://github.com/rayferns",
     "meeting_link": "https://us05web.zoom.us/j/87635261597?pwd=oc0PNCmjUFnR4Oour2ya3B5TetUfvB.1",
     "meeting_password": "VVrJi2"
+  },
+  {
+    "id": 17,
+    "name": "Derrick Wippler",
+    "email": "thrawn01@gmail.com",
+    "country": "Texas, US",
+    "date": null,
+    "time": null,
+    "timezone": null,
+    "phone": null,
+    "linkedin": null,
+    "github": "https://github.com/thrawn01",
+    "meeting_link": null,
+    "meeting_password": null
   }
 ]
