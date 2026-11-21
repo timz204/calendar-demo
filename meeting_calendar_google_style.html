@@ -1,0 +1,878 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interview Schedule Calendar</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f8fafd;
+    color: #202124;
+}
+
+header {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    padding: 0 25px;
+    border-bottom: 1px solid #dadce0;
+    background: white;
+    gap: 20px;
+}
+
+.logo {
+    font-size: 21px;
+    font-weight: 600;
+    color: #4285f4;
+}
+
+header button, button {
+    cursor: pointer;
+    border: 1px solid #dadce0;
+    background: white;
+    padding: 10px 16px;
+    border-radius: 7px;
+    font-size: 14px;
+}
+
+header button:hover, button:hover {
+    background: #f1f3f4;
+}
+
+.month-title {
+    font-size: 22px;
+    font-weight: 500;
+    min-width: 190px;
+}
+
+.container {
+    padding: 22px;
+    max-width: 1600px;
+    margin: auto;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.toolbar .spacer {
+    flex: 1;
+}
+
+.primary {
+    background: #1a73e8;
+    color: white;
+    border: none;
+}
+
+.primary:hover {
+    background: #1765cc;
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    border-top: 1px solid #dadce0;
+    border-left: 1px solid #dadce0;
+    background: white;
+}
+
+.weekday {
+    text-align: center;
+    padding: 14px 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #5f6368;
+    border-right: 1px solid #dadce0;
+    border-bottom: 1px solid #dadce0;
+}
+
+.day {
+    min-height: 125px;
+    padding: 8px;
+    border-right: 1px solid #dadce0;
+    border-bottom: 1px solid #dadce0;
+    position: relative;
+}
+
+.day.other-month {
+    background: #f8fafd;
+    color: #a0a0a0;
+}
+
+.day.today {
+    background: #f0f6ff;
+}
+
+.day-number {
+    font-size: 13px;
+    margin-bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+}
+
+.today .day-number {
+    background: #1a73e8;
+    color: white;
+}
+
+.event {
+    background: #d2e3fc;
+    border-left: 3px solid #4285f4;
+    color: #174ea6;
+    padding: 6px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.event:hover {
+    background: #b8d3fa;
+}
+
+.event-time {
+    font-weight: bold;
+}
+
+.event-name {
+    margin-top: 3px;
+}
+
+.empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #777;
+}
+
+.panel {
+    background: white;
+    border: 1px solid #dadce0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 25px;
+}
+
+.panel h3 {
+    margin-top: 0;
+}
+
+textarea {
+    width: 100%;
+    min-height: 180px;
+    padding: 12px;
+    border: 1px solid #dadce0;
+    border-radius: 7px;
+    font-family: monospace;
+    font-size: 12px;
+    resize: vertical;
+}
+
+.status {
+    margin-top: 12px;
+    font-size: 13px;
+}
+
+.success {
+    color: #188038;
+}
+
+.error {
+    color: #d93025;
+}
+
+.warning {
+    color: #b06000;
+}
+
+.details {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    z-index: 10;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+}
+
+.details-content {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 450px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.details-content h2 {
+    margin-top: 0;
+}
+
+.details-content p {
+    overflow-wrap: anywhere;
+    font-size: 14px;
+}
+
+.details-content a {
+    color: #1a73e8;
+}
+
+.close {
+    float: right;
+    border: none;
+    font-size: 20px;
+    padding: 0 8px;
+}
+
+@media(max-width: 700px) {
+    .container {
+        padding: 10px;
+    }
+
+    .day {
+        min-height: 90px;
+        padding: 3px;
+    }
+
+    .event {
+        font-size: 9px;
+        padding: 3px;
+    }
+
+    .month-title {
+        font-size: 17px;
+        min-width: auto;
+    }
+
+    header {
+        padding: 0 10px;
+        gap: 8px;
+    }
+
+    .logo {
+        font-size: 16px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="logo">▦ Calendar</div>
+    <button onclick="goToday()">Today</button>
+    <button onclick="changeMonth(-1)">‹</button>
+    <button onclick="changeMonth(1)">›</button>
+    <div class="month-title" id="monthTitle"></div>
+</header>
+
+<div class="container">
+
+    <div class="toolbar">
+        <button onclick="goToday()">Today</button>
+        <div class="spacer"></div>
+        <button onclick="exportJSON()">Export JSON</button>
+        <button class="primary" onclick="document.getElementById('jsonFile').click()">
+            Import JSON
+        </button>
+        <input type="file" id="jsonFile" accept=".json,application/json"
+               hidden onchange="importFile(event)">
+    </div>
+
+    <div class="calendar" id="calendar"></div>
+
+    <div class="panel">
+        <h3>JSON Import</h3>
+        <p style="font-size:13px;color:#666">
+            Paste a JSON array containing your contacts and meeting information.
+            Contacts without dates will be preserved in the data but skipped
+            when displaying calendar events.
+        </p>
+
+        <textarea id="jsonInput" placeholder='[
+  {
+    "id": 1,
+    "name": "Example Person",
+    "email": "example@gmail.com",
+    "date": "2026-11-20",
+    "time": "09:00",
+    "timezone": "Asia/Tokyo"
+  }
+]'></textarea>
+
+        <div class="toolbar" style="margin-top:12px">
+            <button class="primary" onclick="importJSON()">Load Calendar</button>
+            <button onclick="clearCalendar()">Clear Calendar</button>
+        </div>
+
+        <div id="status" class="status"></div>
+    </div>
+
+    <div class="panel">
+        <h3>Schedule Summary</h3>
+        <div id="summary"></div>
+    </div>
+
+</div>
+
+<div class="details" id="details" onclick="closeDetails(event)">
+    <div class="details-content">
+        <button class="close" onclick="hideDetails()">×</button>
+        <div id="detailsBody"></div>
+    </div>
+</div>
+
+<script>
+
+// All contacts are retained here.
+// No LocalStorage or database is used.
+
+let contacts = [
+    {
+        "id": 1,
+        "name": "Banlon Jones",
+        "email": "banlonjones@gmail.com",
+        "linkedin": "https://www.linkedin.com/in/banlon-jones",
+        "github": "https://github.com/banlon-jones",
+        "date": "2026-11-20",
+        "time": "09:00",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/87476324624?pwd=M8yMBH04Zk4db0IISmbfZdzQSbGVCk.1",
+        "meeting_password": "U30mJF"
+    },
+    {
+        "id": 2,
+        "name": "Pujan Gautam",
+        "email": "mepujan10@gmail.com",
+        "linkedin": "https://www.linkedin.com/in/pujangautam/",
+        "github": "https://github.com/mepujan",
+        "date": null,
+        "time": null,
+        "timezone": null,
+        "meeting_link": null,
+        "meeting_password": null
+    },
+    {
+        "id": 3,
+        "name": "Riya Chodha",
+        "email": "chodhariya100@gmail.com",
+        "linkedin": "https://www.linkedin.com/in/riya-chodha-093728a6",
+        "github": "https://github.com/riyachodha",
+        "date": "2026-11-20",
+        "time": "16:00",
+        "timezone": "Asia/Tokyo",
+        "phone": "+1 312-940-7341"
+    },
+    {
+        "id": 4,
+        "name": "Josh Reese",
+        "email": "joshgarlandreese@gmail.com",
+        "linkedin": "https://www.linkedin.com/in/joshgarlandreese/",
+        "github": "https://github.com/joshgarlandreese",
+        "date": null,
+        "time": null,
+        "timezone": null
+    },
+    {
+        "id": 5,
+        "name": "Jeeshaan Singh Bakshi",
+        "email": "jeeshaanbakshi@gmail.com",
+        "linkedin": "https://www.linkedin.com/in/jeeshaan-bakshi-01a8a2229/",
+        "github": "https://github.com/JeeshaanBakshi",
+        "date": "2026-11-23",
+        "time": "15:00",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/85161405001?pwd=buqq5Yc0ZMrZCiAtKHQu7FkBUblNUm.1",
+        "meeting_password": "411QGG"
+    },
+    {
+        "id": 6,
+        "name": "Benjamin Granados",
+        "email": "benjamingranados@outlook.com",
+        "linkedin": "https://www.linkedin.com/in/benjamingranados/",
+        "github": "https://github.com/benjamingranados",
+        "date": "2026-11-20",
+        "time": "18:00",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/88192079428?pwd=auL4f1IWqLVRbRiOs2t28BW5Xd3SDP.1",
+        "meeting_password": "8q45Tk"
+    },
+    {
+        "id": 7,
+        "name": "Raul Figueroa",
+        "email": "rfigueroa17@hotmail.com",
+        "linkedin": "https://www.linkedin.com/in/luis-raul-figueroa-soto-63411118a/",
+        "github": "https://github.com/tacodtripe",
+        "date": "2026-11-21",
+        "time": "10:00",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/84443260007?pwd=35obcugSL2txaT2uu0uhKNSaKIqEA7.1",
+        "meeting_password": "g7cixb"
+    },
+    {
+        "id": 8,
+        "name": "Mazen Khan",
+        "email": "mk4124@hw.ac.uk",
+        "linkedin": "https://www.linkedin.com/in/mazen-khan/",
+        "github": "https://github.com/0xcr4cx",
+        "date": null,
+        "time": null,
+        "timezone": null
+    },
+    {
+        "id": 9,
+        "name": "Genesis Lianna Mpangu",
+        "email": "genesisliannamp@outlook.com",
+        "linkedin": null,
+        "github": "https://github.com/genesislianna123",
+        "date": null,
+        "time": null,
+        "timezone": null
+    },
+    {
+        "id": 10,
+        "name": "Andy Zamorano",
+        "email": "andres_zamorano_@hotmail.com",
+        "linkedin": "https://www.linkedin.com/in/andres-zamorano-785b77a1/",
+        "github": "https://github.com/Dachrono",
+        "date": null,
+        "time": null,
+        "timezone": null
+    },
+    {
+        "id": 11,
+        "name": "Dishant Patel",
+        "email": "dishantpatel27@gmail.com",
+        "linkedin": "https://www.linkedin.com/in/dishantpatel27/",
+        "github": "https://github.com/dishantpatel27",
+        "date": null,
+        "time": null,
+        "timezone": null
+    },
+    {
+        "id": 12,
+        "name": "Nausher Rao",
+        "email": "nausher@sherrao.tech",
+        "linkedin": "https://linkedin.com/in/nausherrao",
+        "github": "https://github.com/SherRao",
+        "date": "2026-11-21",
+        "time": "15:30",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/85199057841?pwd=SobPTb1Xq8WuoopoXraZDprnRRhzOk.1",
+        "meeting_password": "4S16JN"
+    },
+    {
+        "id": 13,
+        "name": "Tiegan Benson",
+        "email": "tiegan@sagirisdev.com",
+        "linkedin": null,
+        "github": "https://github.com/SagirisWebDev",
+        "date": "2026-11-24",
+        "time": "09:00",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/82921504820?pwd=1DYxQczginCdD0CrXZ09tJPQSbdPnF.1",
+        "meeting_password": "T2T3r6"
+    },
+    {
+        "id": 14,
+        "name": "Michael Ogunjimi",
+        "email": "michael_ogunjimi@yahoo.com",
+        "linkedin": "https://linkedin.com/in/michaelogunjimi/",
+        "github": "https://github.com/MichaelOgunjimi",
+        "date": "2026-11-24",
+        "time": "10:00",
+        "timezone": "Asia/Tokyo",
+        "meeting_link": "https://us05web.zoom.us/j/83363481787?pwd=EWWl9LQdRvh2DYSjTqbxBpst6Yl8Yf.1",
+        "meeting_password": "9SrARC"
+    },
+    {
+        "id": 15,
+        "name": "Carson Chittom",
+        "email": "carson@chittom.family",
+        "linkedin": null,
+        "github": "https://github.com/cmchittom",
+        "date": null,
+        "time": null,
+        "timezone": null
+    }
+];
+
+let currentDate = new Date(2026, 10, 1);
+
+function validDate(dateString) {
+    if (typeof dateString !== "string" ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+        return false;
+    }
+
+    const [year, month, day] = dateString.split("-").map(Number);
+
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    return date.getUTCFullYear() === year &&
+           date.getUTCMonth() === month - 1 &&
+           date.getUTCDate() === day;
+}
+
+function validTime(time) {
+    return typeof time === "string" &&
+           /^([01]\d|2[0-3]):[0-5]\d$/.test(time);
+}
+
+function getScheduledEvents() {
+    return contacts.filter(person =>
+        validDate(person.date) &&
+        validTime(person.time)
+    );
+}
+
+function renderCalendar() {
+    const calendar = document.getElementById("calendar");
+
+    calendar.innerHTML = "";
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    document.getElementById("monthTitle").textContent =
+        currentDate.toLocaleDateString("en-US", {
+            month: "long",
+            year: "numeric"
+        });
+
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    weekdays.forEach(day => {
+        const element = document.createElement("div");
+        element.className = "weekday";
+        element.textContent = day;
+        calendar.appendChild(element);
+    });
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const previousMonthDays = new Date(year, month, 0).getDate();
+
+    const today = new Date();
+
+    for (let i = 0; i < 42; i++) {
+        let dayNumber;
+        let cellDate;
+        let otherMonth = false;
+
+        if (i < firstDay) {
+            dayNumber = previousMonthDays - firstDay + i + 1;
+            cellDate = new Date(year, month - 1, dayNumber);
+            otherMonth = true;
+        } else if (i >= firstDay + daysInMonth) {
+            dayNumber = i - firstDay - daysInMonth + 1;
+            cellDate = new Date(year, month + 1, dayNumber);
+            otherMonth = true;
+        } else {
+            dayNumber = i - firstDay + 1;
+            cellDate = new Date(year, month, dayNumber);
+        }
+
+        const dateKey =
+            `${cellDate.getFullYear()}-${String(cellDate.getMonth()+1).padStart(2,"0")}-${String(cellDate.getDate()).padStart(2,"0")}`;
+
+        const cell = document.createElement("div");
+        cell.className = "day";
+
+        if (otherMonth) cell.classList.add("other-month");
+
+        if (
+            cellDate.getFullYear() === today.getFullYear() &&
+            cellDate.getMonth() === today.getMonth() &&
+            cellDate.getDate() === today.getDate()
+        ) {
+            cell.classList.add("today");
+        }
+
+        const number = document.createElement("div");
+        number.className = "day-number";
+        number.textContent = dayNumber;
+        cell.appendChild(number);
+
+        const dayEvents = getScheduledEvents()
+            .filter(event => event.date === dateKey)
+            .sort((a, b) => a.time.localeCompare(b.time));
+
+        dayEvents.forEach(event => {
+            const eventElement = document.createElement("div");
+            eventElement.className = "event";
+
+            const time = document.createElement("div");
+            time.className = "event-time";
+            time.textContent = formatTime(event.time);
+
+            const name = document.createElement("div");
+            name.className = "event-name";
+            name.textContent = event.name || "Unnamed event";
+
+            eventElement.append(time, name);
+
+            eventElement.onclick = () => showDetails(event);
+
+            cell.appendChild(eventElement);
+        });
+
+        calendar.appendChild(cell);
+    }
+
+    renderSummary();
+}
+
+function formatTime(time) {
+    const [hour, minute] = time.split(":").map(Number);
+
+    const suffix = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12;
+
+    return `${String(formattedHour).padStart(2, "0")}:${String(minute).padStart(2, "0")} ${suffix}`;
+}
+
+function changeMonth(amount) {
+    currentDate.setMonth(currentDate.getMonth() + amount);
+    renderCalendar();
+}
+
+function goToday() {
+    currentDate = new Date();
+    currentDate.setDate(1);
+    renderCalendar();
+}
+
+function showDetails(event) {
+    const body = document.getElementById("detailsBody");
+
+    body.replaceChildren();
+
+    const heading = document.createElement("h2");
+    heading.textContent = event.name || "Meeting";
+    body.appendChild(heading);
+
+    function addText(label, value) {
+        if (value === undefined || value === null || value === "") return;
+
+        const p = document.createElement("p");
+        const strong = document.createElement("strong");
+        strong.textContent = label + ": ";
+
+        p.append(strong, document.createTextNode(String(value)));
+        body.appendChild(p);
+    }
+
+    addText("Email", event.email);
+    addText("Date", event.date);
+    addText("Time", formatTime(event.time));
+    addText("Timezone", event.timezone);
+    addText("Phone", event.phone);
+    addText("Meeting Password", event.meeting_password);
+
+    ["linkedin", "github", "meeting_link"].forEach(key => {
+        if (!event[key]) return;
+
+        const p = document.createElement("p");
+        const a = document.createElement("a");
+
+        a.href = event[key];
+        a.textContent = key === "meeting_link"
+            ? "Join Meeting"
+            : key.charAt(0).toUpperCase() + key.slice(1);
+
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+
+        p.appendChild(a);
+        body.appendChild(p);
+    });
+
+    document.getElementById("details").style.display = "flex";
+}
+
+function hideDetails() {
+    document.getElementById("details").style.display = "none";
+}
+
+function closeDetails(event) {
+    if (event.target.id === "details") hideDetails();
+}
+
+function importJSON() {
+    const input = document.getElementById("jsonInput").value;
+
+    try {
+        const data = JSON.parse(input);
+
+        if (!Array.isArray(data)) {
+            throw new Error("JSON must be an array.");
+        }
+
+        loadContacts(data);
+
+    } catch (error) {
+        showStatus("Import failed: " + error.message, "error");
+    }
+}
+
+function importFile(event) {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+
+            if (!Array.isArray(data)) {
+                throw new Error("JSON must be an array.");
+            }
+
+            document.getElementById("jsonInput").value =
+                JSON.stringify(data, null, 2);
+
+            loadContacts(data);
+
+        } catch (error) {
+            showStatus("Import failed: " + error.message, "error");
+        }
+
+        event.target.value = "";
+    };
+
+    reader.readAsText(file);
+}
+
+function loadContacts(data) {
+    const validEvents = [];
+    const skipped = [];
+
+    data.forEach((event, index) => {
+        if (!event.date || !event.time) {
+            skipped.push({
+                name: event.name || `Event ${index + 1}`,
+                reason: "Missing date or time"
+            });
+            return;
+        }
+
+        if (!validDate(event.date)) {
+            skipped.push({
+                name: event.name || `Event ${index + 1}`,
+                reason: "Invalid calendar date"
+            });
+            return;
+        }
+
+        if (!validTime(event.time)) {
+            skipped.push({
+                name: event.name || `Event ${index + 1}`,
+                reason: "Invalid time"
+            });
+            return;
+        }
+
+        validEvents.push(event);
+    });
+
+    // Preserve all contacts, including unscheduled ones.
+    contacts = data;
+
+    // Move calendar to first scheduled meeting's month.
+    if (validEvents.length > 0) {
+        const [year, month] = validEvents[0].date.split("-").map(Number);
+        currentDate = new Date(year, month - 1, 1);
+    }
+
+    renderCalendar();
+
+    let message =
+        `Successfully loaded ${contacts.length} contacts. ` +
+        `${validEvents.length} meetings imported. ` +
+        `${skipped.length} contacts skipped.`;
+
+    if (skipped.length > 0) {
+        message += "\n\nSkipped:\n" +
+            skipped.map(item =>
+                `${item.name}: ${item.reason}`
+            ).join("\n");
+    }
+
+    showStatus(message, skipped.length ? "warning" : "success");
+}
+
+function clearCalendar() {
+    contacts = [];
+    renderCalendar();
+    showStatus("Calendar cleared.", "success");
+}
+
+function renderSummary() {
+    const scheduled = getScheduledEvents();
+
+    const summary = document.getElementById("summary");
+
+    summary.innerHTML = `
+        <p>Total contacts: <strong>${contacts.length}</strong></p>
+        <p>Scheduled meetings: <strong>${scheduled.length}</strong></p>
+        <p>Unscheduled contacts: <strong>${contacts.length - scheduled.length}</strong></p>
+    `;
+}
+
+function showStatus(message, type) {
+    const status = document.getElementById("status");
+
+    status.className = "status " + type;
+    status.textContent = message;
+}
+
+function exportJSON() {
+    const blob = new Blob(
+        [JSON.stringify(contacts, null, 2)],
+        { type: "application/json" }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "interview-schedules.json";
+
+    link.click();
+
+    URL.revokeObjectURL(url);
+}
+
+// Initial calendar rendering
+renderCalendar();
+
+document.getElementById("jsonInput").value =
+    JSON.stringify(contacts, null, 2);
+
+</script>
+
+</body>
+</html>
