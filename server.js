@@ -182,7 +182,7 @@ app.post("/api/meetings", async (req, res) => {
         await writeMeetings(meetings);
         res.status(201).json(meeting);
     } catch (error) {
-        res.status(500).json({ error: error.message || "Unable to create meeting." });
+        sendWriteError(res, error, "Unable to create meeting.");
     }
 });
 
@@ -197,7 +197,7 @@ app.put("/api/meetings/:id", async (req, res) => {
         await writeMeetings(meetings);
         res.json(meetings[index]);
     } catch (error) {
-        res.status(500).json({ error: error.message || "Unable to update meeting." });
+        sendWriteError(res, error, "Unable to update meeting.");
     }
 });
 
@@ -210,7 +210,7 @@ app.delete("/api/meetings/:id", async (req, res) => {
         await writeMeetings(meetings);
         res.json(deleted);
     } catch (error) {
-        res.status(500).json({ error: error.message || "Unable to delete meeting." });
+        sendWriteError(res, error, "Unable to delete meeting.");
     }
 });
 
@@ -235,7 +235,7 @@ app.post("/api/interviews", async (req, res) => {
         await writeInterviews(interviews);
         res.status(201).json(interview);
     } catch (error) {
-        res.status(500).json({ error: error.message || "Unable to create interview." });
+        sendWriteError(res, error, "Unable to create interview.");
     }
 });
 
@@ -250,7 +250,7 @@ app.put("/api/interviews/:id", async (req, res) => {
         await writeInterviews(interviews);
         res.json(interviews[index]);
     } catch (error) {
-        res.status(500).json({ error: error.message || "Unable to update interview." });
+        sendWriteError(res, error, "Unable to update interview.");
     }
 });
 
@@ -263,7 +263,7 @@ app.delete("/api/interviews/:id", async (req, res) => {
         await writeInterviews(interviews);
         res.json(deleted);
     } catch (error) {
-        res.status(500).json({ error: error.message || "Unable to delete interview." });
+        sendWriteError(res, error, "Unable to delete interview.");
     }
 });
 
@@ -351,4 +351,16 @@ async function writeGitHubJson(fileName, data, message) {
     }
 
     return true;
+}
+
+function sendWriteError(res, error, fallbackMessage) {
+    const message = error.message || fallbackMessage;
+    if (/GITHUB_TOKEN is required/.test(message)) {
+        return res.status(503).json({
+            error: message,
+            code: "PERSISTENCE_NOT_CONFIGURED",
+            storage: "/api/storage"
+        });
+    }
+    return res.status(500).json({ error: message });
 }
