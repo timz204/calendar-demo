@@ -563,6 +563,35 @@ header {
         min-width: 0;
     }
 }
+
+.tabs {
+    display: flex;
+    gap: 6px;
+    margin: 0 0 16px;
+}
+
+.tab-button {
+    border-radius: 999px;
+}
+
+.tab-button.active {
+    background: #1a73e8;
+    color: white;
+    border-color: #1a73e8;
+}
+
+.job-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.developer-fields {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
 </style>
 </head>
 
@@ -601,6 +630,11 @@ header {
             <button class="primary" onclick="openScheduleForm()">New Schedule</button>
         </div>
 
+        <div class="tabs" role="tablist" aria-label="Schedule type">
+            <button type="button" class="tab-button active" id="jobInterviewTab" onclick="switchTab('interview')">Job Interview</button>
+            <button type="button" class="tab-button" id="developerMeetingTab" onclick="switchTab('developer')">Developer Meeting</button>
+        </div>
+
         <div class="calendar" id="calendar"></div>
 
         <div id="status" class="status"></div>
@@ -621,32 +655,92 @@ header {
     </div>
 </div>
 
-<div class="schedule-modal" id="scheduleModal" onclick="closeScheduleModal(event)">
-        <div class="panel schedule-modal-content" id="schedulePanel">
-            <div class="schedule-modal-header">
-                <h3 id="scheduleFormTitle">Create Schedule</h3>
-                <button class="close" type="button" onclick="closeScheduleForm()">×</button>
-            </div>
-            <input type="hidden" id="scheduleId">
-            <div class="form-grid">
-                <label><span>Name</span><input id="scheduleName" required></label>
-                <label><span>Email</span><input id="scheduleEmail" type="email"></label>
-                <label><span>Country</span><input id="scheduleCountry" placeholder="Japan"></label>
-                <label><span>Date</span><input id="scheduleDate" type="date"></label>
-                <label><span>Time</span><input id="scheduleTime" type="time"></label>
-                <label><span>Timezone</span><input id="scheduleTimezone" placeholder="Asia/Tokyo"></label>
-                <label><span>Phone</span><input id="schedulePhone"></label>
-                <label><span>LinkedIn</span><input id="scheduleLinkedin" type="url"></label>
-                <label><span>GitHub</span><input id="scheduleGithub" type="url"></label>
-                <label><span>Meeting Link</span><input id="scheduleMeetingLink" type="url"></label>
-                <label><span>Meeting Password</span><input id="scheduleMeetingPassword"></label>
-            </div>
-            <div class="form-actions">
-                <button type="button" onclick="closeScheduleForm()">Cancel</button>
-                <button type="button" class="primary" onclick="saveSchedule()">Save</button>
-            </div>
+<div class="schedule-modal" id="interviewModal" onclick="closeInterviewModal(event)">
+    <div class="panel schedule-modal-content">
+        <div class="schedule-modal-header">
+            <h3 id="interviewFormTitle">Create Job Interview</h3>
+            <button class="close" type="button" onclick="closeScheduleForm()">×</button>
+        </div>
+        <input type="hidden" id="interviewId">
+        <div class="form-grid">
+            <label><span>Candidate Name</span><input id="interviewName" required></label>
+            <label><span>Recruiting Chat / Title</span><input id="interviewTitle"></label>
+            <label><span>Email</span><input id="interviewEmail" type="email"></label>
+            <label><span>Country</span><input id="interviewCountry"></label>
+            <label><span>Date</span><input id="interviewDate" type="date"></label>
+            <label><span>Start Time</span><input id="interviewTime" type="time"></label>
+            <label><span>End Time</span><input id="interviewEndTime" type="time"></label>
+            <label><span>Timezone</span>
+                <select id="interviewTimezone">
+                    <option value="">Select timezone</option>
+                    <option value="America/New_York">EST / America/New_York</option>
+                    <option value="America/Chicago">CST / America/Chicago</option>
+                    <option value="America/Denver">MST / America/Denver</option>
+                    <option value="America/Los_Angeles">PST / America/Los_Angeles</option>
+                    <option value="America/Toronto">Toronto / America/Toronto</option>
+                    <option value="Europe/London">GMT / Europe/London</option>
+                    <option value="Europe/Berlin">Central Europe / Europe/Berlin</option>
+                    <option value="Asia/Tokyo">Japan / Asia/Tokyo</option>
+                    <option value="Asia/Kolkata">India / Asia/Kolkata</option>
+                    <option value="Australia/Sydney">Sydney / Australia/Sydney</option>
+                    <option value="UTC">UTC</option>
+                </select>
+            </label>
+            <label><span>Phone</span><input id="interviewPhone"></label>
+            <label><span>Job Description</span><input id="interviewJobDescription" type="url"></label>
+            <label><span>Resume</span><input id="interviewResume" type="url"></label>
+            <label><span>Meeting Link</span><input id="interviewMeetingLink" type="url"></label>
+            <label><span>Interviewers</span><input id="interviewInterviewers"></label>
+        </div>
+        <div class="form-actions">
+            <button type="button" onclick="closeScheduleForm()">Cancel</button>
+            <button type="button" class="primary" onclick="saveInterview()">Save Interview</button>
         </div>
     </div>
+</div>
+
+<div class="schedule-modal" id="meetingModal" onclick="closeMeetingModal(event)">
+    <div class="panel schedule-modal-content">
+        <div class="schedule-modal-header">
+            <h3 id="meetingFormTitle">Create Developer Meeting</h3>
+            <button class="close" type="button" onclick="closeScheduleForm()">×</button>
+        </div>
+        <input type="hidden" id="meetingId">
+        <div class="form-grid">
+            <label><span>Name</span><input id="meetingName" required></label>
+            <label><span>Email</span><input id="meetingEmail" type="email"></label>
+            <label><span>Country</span><input id="meetingCountry"></label>
+            <label><span>Date</span><input id="meetingDate" type="date"></label>
+            <label><span>Start Time</span><input id="meetingTime" type="time"></label>
+            <label><span>End Time</span><input id="meetingEndTime" type="time"></label>
+            <label><span>Timezone</span>
+                <select id="meetingTimezone">
+                    <option value="">Select timezone</option>
+                    <option value="America/New_York">EST / America/New_York</option>
+                    <option value="America/Chicago">CST / America/Chicago</option>
+                    <option value="America/Denver">MST / America/Denver</option>
+                    <option value="America/Los_Angeles">PST / America/Los_Angeles</option>
+                    <option value="America/Toronto">Toronto / America/Toronto</option>
+                    <option value="Europe/London">GMT / Europe/London</option>
+                    <option value="Europe/Berlin">Central Europe / Europe/Berlin</option>
+                    <option value="Asia/Tokyo">Japan / Asia/Tokyo</option>
+                    <option value="Asia/Kolkata">India / Asia/Kolkata</option>
+                    <option value="Australia/Sydney">Sydney / Australia/Sydney</option>
+                    <option value="UTC">UTC</option>
+                </select>
+            </label>
+            <label><span>Phone</span><input id="meetingPhone"></label>
+            <label><span>LinkedIn</span><input id="meetingLinkedin" type="url"></label>
+            <label><span>GitHub</span><input id="meetingGithub" type="url"></label>
+            <label><span>Meeting Link</span><input id="meetingLink" type="url"></label>
+            <label><span>Meeting Password</span><input id="meetingPassword"></label>
+        </div>
+        <div class="form-actions">
+            <button type="button" onclick="closeScheduleForm()">Cancel</button>
+            <button type="button" class="primary" onclick="saveDeveloperMeeting()">Save Meeting</button>
+        </div>
+    </div>
+</div>
 
 <script>
 
@@ -826,23 +920,33 @@ let contacts = [
 let currentDate = new Date(2026, 10, 1);
 let miniCalendarDate = new Date(2026, 10, 1);
 
+let developerMeetings = [];
+let jobInterviews = [];
+let activeTab = "interview";
+
 async function loadMeetingsFromServer() {
     try {
-        const response = await fetch("/api/meetings", {
-            cache: "no-store",
-            headers: { "Accept": "application/json" }
-        });
-        if (!response.ok) throw new Error("Unable to load meetings from server.");
+        const [meetingResponse, interviewResponse] = await Promise.all([
+            fetch("/api/meetings", { cache: "no-store", headers: { "Accept": "application/json" } }),
+            fetch("/api/interviews", { cache: "no-store", headers: { "Accept": "application/json" } })
+        ]);
 
-        const data = await response.json();
-        if (!Array.isArray(data)) throw new Error("meetings.json must contain a JSON array.");
+        if (!meetingResponse.ok) throw new Error("Unable to load meetings.json.");
+        if (!interviewResponse.ok) throw new Error("Unable to load interview.json.");
 
-        contacts = data;
+        developerMeetings = await meetingResponse.json();
+        jobInterviews = await interviewResponse.json();
+
+        if (!Array.isArray(developerMeetings) || !Array.isArray(jobInterviews)) {
+            throw new Error("Both schedule files must contain JSON arrays.");
+        }
+
+        contacts = activeTab === "interview" ? jobInterviews : developerMeetings;
 
         renderCalendar();
         renderUserList();
         renderMiniCalendar();
-        showStatus(`Automatically loaded ${contacts.length} contacts from meetings.json.`, "success");
+        showStatus(`Loaded ${jobInterviews.length} interviews and ${developerMeetings.length} developer meetings.`, "success");
     } catch (error) {
         showStatus("Auto import failed: " + error.message, "error");
     }
@@ -904,7 +1008,7 @@ function renderUserList() {
         status.className = "user-status";
         const isScheduled = validDate(person.date) && validTime(person.time);
         status.textContent = isScheduled
-            ? `${person.date} · ${formatTime(person.time)}`
+            ? `${person.date} · ${formatTimeRange(person.time, person.end_time)}`
             : "Unscheduled";
         if (!isScheduled) status.classList.add("unscheduled");
 
@@ -1000,7 +1104,7 @@ function renderCalendar() {
 
             const time = document.createElement("div");
             time.className = "event-time";
-            time.textContent = formatTime(event.time);
+            time.textContent = formatTimeRange(event.time, event.end_time);
 
             const name = document.createElement("div");
             name.className = "event-name";
@@ -1057,12 +1161,14 @@ function showDetails(event) {
     addText("Email", event.email);
     addText("Country", event.country);
     addText("Date", event.date);
-    addText("Time", formatTime(event.time));
+    addText("Time", formatTimeRange(event.time, event.end_time));
     addText("Timezone", event.timezone);
     addText("Phone", event.phone);
     addText("Meeting Password", event.meeting_password);
+    addText("Recruiting Chat / Title", event.title);
+    addText("Interviewers", event.interviewers);
 
-    ["linkedin", "github", "meeting_link"].forEach(key => {
+    ["linkedin", "github", "meeting_link", "job_description", "resume"].forEach(key => {
         if (!event[key]) return;
 
         const p = document.createElement("p");
@@ -1136,7 +1242,7 @@ function exportJSON() {
 
     const link = document.createElement("a");
     link.href = url;
-    link.download = "interview-schedules.json";
+    link.download = activeTab === "interview" ? "interview.json" : "meetings.json";
 
     link.click();
 
@@ -1144,61 +1250,117 @@ function exportJSON() {
 }
 
 async function openScheduleForm(meeting = null) {
-    document.getElementById("scheduleModal").style.display = "flex";
     document.body.style.overflow = "hidden";
-    document.getElementById("scheduleFormTitle").textContent = meeting ? "Edit Schedule" : "Create Schedule";
 
-    document.getElementById("scheduleId").value = meeting?.id ?? "";
-    document.getElementById("scheduleName").value = meeting?.name ?? "";
-    document.getElementById("scheduleEmail").value = meeting?.email ?? "";
-    document.getElementById("scheduleCountry").value = meeting?.country ?? "";
-    document.getElementById("scheduleDate").value = meeting?.date ?? "";
-    document.getElementById("scheduleTime").value = meeting?.time ?? "";
-    document.getElementById("scheduleTimezone").value = meeting?.timezone ?? "";
-    document.getElementById("schedulePhone").value = meeting?.phone ?? "";
-    document.getElementById("scheduleLinkedin").value = meeting?.linkedin ?? "";
-    document.getElementById("scheduleGithub").value = meeting?.github ?? "";
-    document.getElementById("scheduleMeetingLink").value = meeting?.meeting_link ?? "";
-    document.getElementById("scheduleMeetingPassword").value = meeting?.meeting_password ?? "";
-
-    setTimeout(() => document.getElementById("scheduleName").focus(), 0);
+    if (activeTab === "interview") {
+        document.getElementById("interviewModal").style.display = "flex";
+        document.getElementById("interviewFormTitle").textContent = meeting ? "Edit Job Interview" : "Create Job Interview";
+        document.getElementById("interviewId").value = meeting?.id ?? "";
+        document.getElementById("interviewName").value = meeting?.name ?? "";
+        document.getElementById("interviewTitle").value = meeting?.title ?? "";
+        document.getElementById("interviewEmail").value = meeting?.email ?? "";
+        document.getElementById("interviewCountry").value = meeting?.country ?? "";
+        document.getElementById("interviewDate").value = meeting?.date ?? "";
+        document.getElementById("interviewTime").value = meeting?.time ?? "";
+        document.getElementById("interviewEndTime").value = meeting?.end_time ?? "";
+        document.getElementById("interviewTimezone").value = meeting?.timezone ?? "";
+        document.getElementById("interviewPhone").value = meeting?.phone ?? "";
+        document.getElementById("interviewJobDescription").value = meeting?.job_description ?? "";
+        document.getElementById("interviewResume").value = meeting?.resume ?? "";
+        document.getElementById("interviewMeetingLink").value = meeting?.meeting_link ?? "";
+        document.getElementById("interviewInterviewers").value = meeting?.interviewers ?? "";
+        setTimeout(() => document.getElementById("interviewName").focus(), 0);
+    } else {
+        document.getElementById("meetingModal").style.display = "flex";
+        document.getElementById("meetingFormTitle").textContent = meeting ? "Edit Developer Meeting" : "Create Developer Meeting";
+        document.getElementById("meetingId").value = meeting?.id ?? "";
+        document.getElementById("meetingName").value = meeting?.name ?? "";
+        document.getElementById("meetingEmail").value = meeting?.email ?? "";
+        document.getElementById("meetingCountry").value = meeting?.country ?? "";
+        document.getElementById("meetingDate").value = meeting?.date ?? "";
+        document.getElementById("meetingTime").value = meeting?.time ?? "";
+        document.getElementById("meetingEndTime").value = meeting?.end_time ?? "";
+        document.getElementById("meetingTimezone").value = meeting?.timezone ?? "";
+        document.getElementById("meetingPhone").value = meeting?.phone ?? "";
+        document.getElementById("meetingLinkedin").value = meeting?.linkedin ?? "";
+        document.getElementById("meetingGithub").value = meeting?.github ?? "";
+        document.getElementById("meetingLink").value = meeting?.meeting_link ?? "";
+        document.getElementById("meetingPassword").value = meeting?.meeting_password ?? "";
+        setTimeout(() => document.getElementById("meetingName").focus(), 0);
+    }
 }
 
 function closeScheduleForm() {
-    document.getElementById("scheduleModal").style.display = "none";
+    document.getElementById("interviewModal").style.display = "none";
+    document.getElementById("meetingModal").style.display = "none";
     document.body.style.overflow = "";
 }
 
-function closeScheduleModal(event) {
-    if (event.target.id === "scheduleModal") closeScheduleForm();
+function closeInterviewModal(event) {
+    if (event.target.id === "interviewModal") closeScheduleForm();
 }
 
-async function saveSchedule() {
-    const id = document.getElementById("scheduleId").value;
-    const meeting = {
-        name: document.getElementById("scheduleName").value.trim(),
-        email: document.getElementById("scheduleEmail").value.trim() || null,
-        country: document.getElementById("scheduleCountry").value.trim() || null,
-        date: document.getElementById("scheduleDate").value || null,
-        time: document.getElementById("scheduleTime").value || null,
-        timezone: document.getElementById("scheduleTimezone").value.trim() || null,
-        phone: document.getElementById("schedulePhone").value.trim() || null,
-        linkedin: document.getElementById("scheduleLinkedin").value.trim() || null,
-        github: document.getElementById("scheduleGithub").value.trim() || null,
-        meeting_link: document.getElementById("scheduleMeetingLink").value.trim() || null,
-        meeting_password: document.getElementById("scheduleMeetingPassword").value.trim() || null
+function closeMeetingModal(event) {
+    if (event.target.id === "meetingModal") closeScheduleForm();
+}
+
+async function saveInterview() {
+    const id = document.getElementById("interviewId").value;
+    const interview = {
+        name: document.getElementById("interviewName").value.trim(),
+        title: document.getElementById("interviewTitle").value.trim() || null,
+        email: document.getElementById("interviewEmail").value.trim() || null,
+        country: document.getElementById("interviewCountry").value.trim() || null,
+        date: document.getElementById("interviewDate").value || null,
+        time: document.getElementById("interviewTime").value || null,
+        end_time: document.getElementById("interviewEndTime").value || null,
+        timezone: document.getElementById("interviewTimezone").value || null,
+        phone: document.getElementById("interviewPhone").value.trim() || null,
+        job_description: document.getElementById("interviewJobDescription").value.trim() || null,
+        resume: document.getElementById("interviewResume").value.trim() || null,
+        meeting_link: document.getElementById("interviewMeetingLink").value.trim() || null,
+        interviewers: document.getElementById("interviewInterviewers").value.trim() || null
     };
 
-    if (!meeting.name) {
+    await saveScheduleItem("interviews", id, interview);
+}
+
+async function saveDeveloperMeeting() {
+    const id = document.getElementById("meetingId").value;
+    const meeting = {
+        name: document.getElementById("meetingName").value.trim(),
+        email: document.getElementById("meetingEmail").value.trim() || null,
+        country: document.getElementById("meetingCountry").value.trim() || null,
+        date: document.getElementById("meetingDate").value || null,
+        time: document.getElementById("meetingTime").value || null,
+        end_time: document.getElementById("meetingEndTime").value || null,
+        timezone: document.getElementById("meetingTimezone").value || null,
+        phone: document.getElementById("meetingPhone").value.trim() || null,
+        linkedin: document.getElementById("meetingLinkedin").value.trim() || null,
+        github: document.getElementById("meetingGithub").value.trim() || null,
+        meeting_link: document.getElementById("meetingLink").value.trim() || null,
+        meeting_password: document.getElementById("meetingPassword").value.trim() || null
+    };
+
+    await saveScheduleItem("meetings", id, meeting);
+}
+
+async function saveScheduleItem(collection, id, item) {
+    if (!item.name) {
         showStatus("Name is required.", "error");
         return;
     }
 
+    if (item.time && item.end_time && item.end_time <= item.time) {
+        showStatus("End time must be after start time.", "error");
+        return;
+    }
+
     try {
-        const response = await fetch(id ? `/api/meetings/${id}` : "/api/meetings", {
+        const response = await fetch(id ? `/api/${collection}/${id}` : `/api/${collection}`, {
             method: id ? "PUT" : "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(meeting)
+            body: JSON.stringify(item)
         });
 
         const result = await response.json();
@@ -1217,7 +1379,8 @@ async function deleteSchedule(id) {
     if (!confirm("Delete this schedule?")) return;
 
     try {
-        const response = await fetch(`/api/meetings/${id}`, { method: "DELETE" });
+        const collection = activeTab === "interview" ? "interviews" : "meetings";
+        const response = await fetch(`/api/${collection}/${id}`, { method: "DELETE" });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Unable to delete schedule.");
 
@@ -1322,6 +1485,47 @@ function formatTime(time) {
     const formattedHour = hour % 12 || 12;
 
     return `${String(formattedHour).padStart(2, "0")}:${String(minute).padStart(2, "0")} ${suffix}`;
+}
+
+function formatTimeRange(start, end) {
+    if (!validTime(start)) return "";
+    if (!validTime(end)) return formatTime(start);
+
+    const [startHour, startMinute] = start.split(":").map(Number);
+    const [endHour, endMinute] = end.split(":").map(Number);
+
+    const startSuffix = startHour >= 12 ? "PM" : "AM";
+    const endSuffix = endHour >= 12 ? "PM" : "AM";
+
+    const formattedStartHour = startHour % 12 || 12;
+    const formattedEndHour = endHour % 12 || 12;
+
+    return `${String(formattedStartHour).padStart(2, "0")}:${String(startMinute).padStart(2, "0")} ${startSuffix} - ${String(formattedEndHour).padStart(2, "0")}:${String(endMinute).padStart(2, "0")} ${endSuffix}`;
+}
+
+function showTab(tab) {
+    const isCalendar = tab === "calendar";
+
+    document.getElementById("calendar").style.display = isCalendar ? "grid" : "none";
+    document.getElementById("userList").style.display = isCalendar ? "none" : "flex";
+
+    document.querySelectorAll(".tab-button").forEach(button => {
+        button.classList.remove("active");
+    });
+
+    document.querySelector(`.tab-button[onclick="showTab('${tab}')"]`).classList.add("active");
+}
+
+function switchTab(type) {
+    activeTab = type;
+    contacts = type === "interview" ? jobInterviews : developerMeetings;
+
+    document.getElementById("jobInterviewTab").classList.toggle("active", type === "interview");
+    document.getElementById("developerMeetingTab").classList.toggle("active", type === "developer");
+
+    renderCalendar();
+    renderUserList();
+    renderMiniCalendar();
 }
 </script>
 
