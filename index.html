@@ -680,7 +680,7 @@ header {
                     <option value="America/Toronto">Toronto / America/Toronto</option>
                     <option value="Europe/London">GMT / Europe/London</option>
                     <option value="Europe/Berlin">Central Europe / Europe/Berlin</option>
-                    <option value="Asia/Tokyo">Japan / Asia/Tokyo</option>
+                    <option value="Asia/Tokyo">JST / Asia/Tokyo</option>
                     <option value="Asia/Kolkata">India / Asia/Kolkata</option>
                     <option value="Australia/Sydney">Sydney / Australia/Sydney</option>
                     <option value="UTC">UTC</option>
@@ -723,7 +723,7 @@ header {
                     <option value="America/Toronto">Toronto / America/Toronto</option>
                     <option value="Europe/London">GMT / Europe/London</option>
                     <option value="Europe/Berlin">Central Europe / Europe/Berlin</option>
-                    <option value="Asia/Tokyo">Japan / Asia/Tokyo</option>
+                    <option value="Asia/Tokyo">JST / Asia/Tokyo</option>
                     <option value="Asia/Kolkata">India / Asia/Kolkata</option>
                     <option value="Australia/Sydney">Sydney / Australia/Sydney</option>
                     <option value="UTC">UTC</option>
@@ -733,7 +733,7 @@ header {
             <label><span>LinkedIn</span><input id="meetingLinkedin" type="url"></label>
             <label><span>GitHub</span><input id="meetingGithub" type="url"></label>
             <label><span>Meeting Link</span><input id="meetingLink" type="url"></label>
-            <label><span>Meeting Password</span><input id="meetingPassword"></label>
+            <label><span>Meeting Password</span><input id="meetingPassword" type="url"></label>
         </div>
         <div class="form-actions">
             <button type="button" onclick="closeScheduleForm()">Cancel</button>
@@ -924,6 +924,9 @@ let developerMeetings = [];
 let jobInterviews = [];
 let activeTab = "interview";
 
+let editingTimezoneOrigin = null;
+let editingTimezoneConverted = false;
+
 async function loadMeetingsFromServer() {
     try {
         const [meetingResponse, interviewResponse] = await Promise.all([
@@ -934,8 +937,8 @@ async function loadMeetingsFromServer() {
         if (!meetingResponse.ok) throw new Error("Unable to load meetings.json.");
         if (!interviewResponse.ok) throw new Error("Unable to load interview.json.");
 
-        developerMeetings = await meetingResponse.json();
-        jobInterviews = await interviewResponse.json();
+        developerMeetings = normalizeScheduleForJST(await meetingResponse.json());
+        jobInterviews = normalizeScheduleForJST(await interviewResponse.json());
 
         if (!Array.isArray(developerMeetings) || !Array.isArray(jobInterviews)) {
             throw new Error("Both schedule files must contain JSON arrays.");
@@ -974,8 +977,8 @@ function validTime(time) {
 
 function getScheduledEvents() {
     return contacts.filter(person =>
-        validDate(person.date) &&
-        validTime(person.time)
+        validDate(person.displayDate || person.date) &&
+        validTime(person.displayTime || person.time)
     );
 }
 
@@ -1006,9 +1009,9 @@ function renderUserList() {
 
         const status = document.createElement("span");
         status.className = "user-status";
-        const isScheduled = validDate(person.date) && validTime(person.time);
+        const isScheduled = validDate(person.displayDate || person.date) && validTime(person.displayTime || person.time);
         status.textContent = isScheduled
-            ? `${person.date} · ${formatTimeRange(person.time, person.end_time)}`
+            ? `${person.displayDate || person.date} · ${formatTimeRange(person.displayTime || person.time, person.displayEndTime || person.end_time)} (${person.displayTimezone || "JST"})`
             : "Unscheduled";
         if (!isScheduled) status.classList.add("unscheduled");
 
@@ -1095,8 +1098,8 @@ function renderCalendar() {
         cell.appendChild(number);
 
         const dayEvents = getScheduledEvents()
-            .filter(event => event.date === dateKey)
-            .sort((a, b) => a.time.localeCompare(b.time));
+            .filter(event => (event.displayDate || event.date) === dateKey)
+            .sort((a, b) => (a.displayTime || a.time).localeCompare(b.displayTime || b.time));
 
         dayEvents.forEach(event => {
             const eventElement = document.createElement("div");
@@ -1104,7 +1107,7 @@ function renderCalendar() {
 
             const time = document.createElement("div");
             time.className = "event-time";
-            time.textContent = formatTimeRange(event.time, event.end_time);
+            time.textContent = formatTimeRange(event.displayTime || event.time, event.displayEndTime || event.end_time);
 
             const name = document.createElement("div");
             name.className = "event-name";
@@ -1251,6 +1254,8 @@ function exportJSON() {
 
 async function openScheduleForm(meeting = null) {
     document.body.style.overflow = "hidden";
+    editingTimezoneOrigin = meeting?._sourceTimezone || meeting?.timezone || null;
+    editingTimezoneConverted = Boolean(meeting?._jstConverted);
 
     if (activeTab === "interview") {
         document.getElementById("interviewModal").style.display = "flex";
@@ -1263,7 +1268,7 @@ async function openScheduleForm(meeting = null) {
         document.getElementById("interviewDate").value = meeting?.date ?? "";
         document.getElementById("interviewTime").value = meeting?.time ?? "";
         document.getElementById("interviewEndTime").value = meeting?.end_time ?? "";
-        document.getElementById("interviewTimezone").value = meeting?.timezone ?? "";
+        document.getElementById("interviewTimezone").value = meeting?._sourceTimezone || meeting?.timezone || "";
         document.getElementById("interviewPhone").value = meeting?.phone ?? "";
         document.getElementById("interviewJobDescription").value = meeting?.job_description ?? "";
         document.getElementById("interviewResume").value = meeting?.resume ?? "";
@@ -1280,7 +1285,7 @@ async function openScheduleForm(meeting = null) {
         document.getElementById("meetingDate").value = meeting?.date ?? "";
         document.getElementById("meetingTime").value = meeting?.time ?? "";
         document.getElementById("meetingEndTime").value = meeting?.end_time ?? "";
-        document.getElementById("meetingTimezone").value = meeting?.timezone ?? "";
+        document.getElementById("meetingTimezone").value = meeting?._sourceTimezone || meeting?.timezone || "";
         document.getElementById("meetingPhone").value = meeting?.phone ?? "";
         document.getElementById("meetingLinkedin").value = meeting?.linkedin ?? "";
         document.getElementById("meetingGithub").value = meeting?.github ?? "";
@@ -1306,7 +1311,7 @@ function closeMeetingModal(event) {
 
 async function saveInterview() {
     const id = document.getElementById("interviewId").value;
-    const interview = {
+    const interview = prepareScheduleForJST({
         name: document.getElementById("interviewName").value.trim(),
         title: document.getElementById("interviewTitle").value.trim() || null,
         email: document.getElementById("interviewEmail").value.trim() || null,
@@ -1320,14 +1325,14 @@ async function saveInterview() {
         resume: document.getElementById("interviewResume").value.trim() || null,
         meeting_link: document.getElementById("interviewMeetingLink").value.trim() || null,
         interviewers: document.getElementById("interviewInterviewers").value.trim() || null
-    };
+    });
 
     await saveScheduleItem("interviews", id, interview);
 }
 
 async function saveDeveloperMeeting() {
     const id = document.getElementById("meetingId").value;
-    const meeting = {
+    const meeting = prepareScheduleForJST({
         name: document.getElementById("meetingName").value.trim(),
         email: document.getElementById("meetingEmail").value.trim() || null,
         country: document.getElementById("meetingCountry").value.trim() || null,
@@ -1340,9 +1345,13 @@ async function saveDeveloperMeeting() {
         github: document.getElementById("meetingGithub").value.trim() || null,
         meeting_link: document.getElementById("meetingLink").value.trim() || null,
         meeting_password: document.getElementById("meetingPassword").value.trim() || null
-    };
+    });
 
     await saveScheduleItem("meetings", id, meeting);
+}
+
+function prepareScheduleForJST(item) {
+    return { ...item };
 }
 
 async function saveScheduleItem(collection, id, item) {
@@ -1416,7 +1425,7 @@ function getDateKey(date) {
 }
 
 function isDateBooked(dateKey) {
-    return getScheduledEvents().some(event => event.date === dateKey);
+    return getScheduledEvents().some(event => (event.displayDate || event.date) === dateKey);
 }
 
 function selectFreeDate(dateKey) {
@@ -1540,6 +1549,87 @@ async function checkStorageStatus() {
     } catch (error) {
         // Storage status is informational; the schedule data can still load.
     }
+}
+
+function zonedDateTimeToUTC(dateString, timeString, timezone) {
+    if (!validDate(dateString) || !validTime(timeString) || !timezone || timezone === "JST") return null;
+
+    const [year, month, day] = dateString.split("-").map(Number);
+    const [hour, minute] = timeString.split(":").map(Number);
+    const targetAsUTC = Date.UTC(year, month - 1, day, hour, minute);
+    let utcGuess = targetAsUTC;
+
+    const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: timezone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23"
+    });
+
+    for (let i = 0; i < 3; i++) {
+        const parts = Object.fromEntries(formatter.formatToParts(new Date(utcGuess)).map(part => [part.type, part.value]));
+        const representedAsUTC = Date.UTC(
+            Number(parts.year), Number(parts.month) - 1, Number(parts.day),
+            Number(parts.hour), Number(parts.minute)
+        );
+        const adjustment = targetAsUTC - representedAsUTC;
+        if (adjustment === 0) break;
+        utcGuess += adjustment;
+    }
+
+    return new Date(utcGuess);
+}
+
+function convertScheduleToJST(dateString, timeString, endTime, timezone) {
+    if (!dateString || !timeString) return { date: dateString, time: timeString, end_time: endTime };
+
+    const startUTC = zonedDateTimeToUTC(dateString, timeString, timezone);
+    if (!startUTC) return { date: dateString, time: timeString, end_time: endTime };
+
+    let endUTC = null;
+    if (endTime) endUTC = zonedDateTimeToUTC(dateString, endTime, timezone);
+
+    const jstFormatter = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Tokyo",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23"
+    });
+
+    function formatJST(date) {
+        const parts = Object.fromEntries(jstFormatter.formatToParts(date).map(part => [part.type, part.value]));
+        return {
+            date: `${parts.year}-${parts.month}-${parts.day}`,
+            time: `${parts.hour}:${parts.minute}`
+        };
+    }
+
+    const start = formatJST(startUTC);
+    const end = endUTC ? formatJST(endUTC) : null;
+    return { date: start.date, time: start.time, end_time: end?.time ?? null };
+}
+
+function normalizeScheduleForJST(schedule) {
+    return schedule.map(item => {
+        if (!item.date || !item.time || !item.timezone) {
+            return { ...item, displayDate: item.date, displayTime: item.time, displayEndTime: item.end_time };
+        }
+
+        const converted = convertScheduleToJST(item.date, item.time, item.end_time, item.timezone);
+        return {
+            ...item,
+            displayDate: converted.date,
+            displayTime: converted.time,
+            displayEndTime: converted.end_time,
+            displayTimezone: "JST"
+        };
+    });
 }
 </script>
 

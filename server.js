@@ -100,7 +100,7 @@ async function readInterviews() {
         const githubFile = await readGitHubJson("interview.json");
         if (githubFile) {
             memoryInterviews = githubFile.data;
-            return githubFile.data;
+            return memoryInterviews;
         }
     }
 
