@@ -5,9 +5,14 @@ const os = require("os");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const meetingsFile = path.join(__dirname, "meetings.json");
+const seedMeetingsFile = path.join(__dirname, "meetings.json");
+const meetingsFile = process.env.VERCEL
+    ? path.join(os.tmpdir(), "schedule-meetings.json")
+    : seedMeetingsFile;
 
 app.use(express.json({ limit: "2mb" }));
+
+let memoryMeetings = null;
 
 function normalizeMeetings(meetings) {
     return meetings.map(meeting => ({
@@ -17,12 +22,26 @@ function normalizeMeetings(meetings) {
 }
 
 function readMeetings() {
+    if (memoryMeetings) return normalizeMeetings(memoryMeetings);
+
+    if (!fs.existsSync(meetingsFile)) {
+        fs.copyFileSync(seedMeetingsFile, meetingsFile);
+    }
+
     const meetings = JSON.parse(fs.readFileSync(meetingsFile, "utf8"));
+    memoryMeetings = meetings;
     return normalizeMeetings(meetings);
 }
 
 function writeMeetings(meetings) {
-    fs.writeFileSync(meetingsFile, JSON.stringify(normalizeMeetings(meetings), null, 2));
+    const normalized = normalizeMeetings(meetings);
+    memoryMeetings = normalized;
+
+    if (process.env.VERCEL) {
+        fs.writeFileSync(meetingsFile, JSON.stringify(normalized, null, 2));
+    } else {
+        fs.writeFileSync(seedMeetingsFile, JSON.stringify(normalized, null, 2));
+    }
 }
 
 function validDate(value) {
@@ -54,6 +73,7 @@ function validateMeeting(meeting) {
 
 app.get("/api/meetings", (req, res) => {
     try {
+        res.set("Cache-Control", "no-store");
         res.json(readMeetings());
     } catch (error) {
         res.status(500).json({ error: "Unable to read meetings." });
@@ -61,11 +81,15 @@ app.get("/api/meetings", (req, res) => {
 });
 
 app.get("/api/meetings/:id", (req, res) => {
-    const meetings = readMeetings();
-    const meeting = meetings.find(item => String(item.id) === req.params.id);
+    try {
+        const meetings = readMeetings();
+        const meeting = meetings.find(item => String(item.id) === req.params.id);
 
-    if (!meeting) return res.status(404).json({ error: "Meeting not found." });
-    res.json(meeting);
+        if (!meeting) return res.status(404).json({ error: "Meeting not found." });
+        res.json(meeting);
+    } catch (error) {
+        res.status(500).json({ error: "Unable to read meeting." });
+    }
 });
 
 app.post("/api/meetings", (req, res) => {
@@ -123,16 +147,20 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.listen(PORT, "0.0.0.0", () => {
-    const interfaces = os.networkInterfaces();
-    const addresses = Object.values(interfaces)
-        .flat()
-        .filter(address => address && address.family === "IPv4" && !address.internal)
-        .map(address => address.address);
+if (require.main === module) {
+    app.listen(PORT, "0.0.0.0", () => {
+        const interfaces = os.networkInterfaces();
+        const addresses = Object.values(interfaces)
+            .flat()
+            .filter(address => address && address.family === "IPv4" && !address.internal)
+            .map(address => address.address);
 
-    console.log(`Calendar server running on port ${PORT}`);
-    console.log(`Local: http://localhost:${PORT}`);
-    addresses.forEach(address => {
-        console.log(`Network: http://${address}:${PORT}`);
+        console.log(`Calendar server running on port ${PORT}`);
+        console.log(`Local: http://localhost:${PORT}`);
+        addresses.forEach(address => {
+            console.log(`Network: http://${address}:${PORT}`);
+        });
     });
-});
+}
+
+module.exports = app;
