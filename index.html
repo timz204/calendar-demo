@@ -1397,6 +1397,7 @@ renderCalendar();
 renderUserList();
 renderMiniCalendar();
 loadMeetingsFromServer();
+checkStorageStatus();
 
 document.addEventListener("keydown", event => {
     if (event.key === "Escape") {
@@ -1526,6 +1527,19 @@ function switchTab(type) {
     renderCalendar();
     renderUserList();
     renderMiniCalendar();
+}
+
+async function checkStorageStatus() {
+    try {
+        const response = await fetch("/api/storage", { cache: "no-store" });
+        if (!response.ok) return;
+        const status = await response.json();
+        if (status.vercel && status.persistence === "github-readonly-missing-token") {
+            showStatus("Saving is unavailable: GITHUB_TOKEN is missing in Vercel.", "error");
+        }
+    } catch (error) {
+        // Storage status is informational; the schedule data can still load.
+    }
 }
 </script>
 
