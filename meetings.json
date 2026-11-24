@@ -11,7 +11,9 @@
     "meeting_link": "https://us05web.zoom.us/j/87476324624?pwd=M8yMBH04Zk4db0IISmbfZdzQSbGVCk.1",
     "meeting_password": "U30mJF",
     "country": "Canada",
-    "phone": null
+    "phone": null,
+    "end_time": null,
+    "status": "didnt-attend"
   },
   {
     "id": 2,
@@ -39,7 +41,9 @@
     "phone": "+1 312-940-7341",
     "country": "Canada",
     "meeting_link": null,
-    "meeting_password": null
+    "meeting_password": null,
+    "end_time": null,
+    "status": "didnt-attend"
   },
   {
     "id": 4,
@@ -67,7 +71,9 @@
     "meeting_link": "https://us05web.zoom.us/j/85161405001?pwd=buqq5Yc0ZMrZCiAtKHQu7FkBUblNUm.1",
     "meeting_password": "411QGG",
     "country": "Canada",
-    "phone": null
+    "phone": null,
+    "end_time": null,
+    "status": "didnt-attend"
   },
   {
     "id": 6,
@@ -81,7 +87,9 @@
     "meeting_link": "https://us05web.zoom.us/j/88192079428?pwd=auL4f1IWqLVRbRiOs2t28BW5Xd3SDP.1",
     "meeting_password": "8q45Tk",
     "country": "Mexico",
-    "phone": null
+    "phone": null,
+    "end_time": null,
+    "status": "didnt-attend"
   },
   {
     "id": 7,
@@ -95,7 +103,9 @@
     "meeting_link": "https://us05web.zoom.us/j/84443260007?pwd=35obcugSL2txaT2uu0uhKNSaKIqEA7.1",
     "meeting_password": "g7cixb",
     "country": "Mexico",
-    "phone": null
+    "phone": null,
+    "end_time": null,
+    "status": "failed"
   },
   {
     "id": 8,
@@ -166,7 +176,8 @@
     "meeting_password": "k1jBZk",
     "country": "Canada",
     "phone": null,
-    "end_time": "10:00"
+    "end_time": null,
+    "status": "didnt-attend"
   },
   {
     "id": 13,
@@ -180,7 +191,9 @@
     "meeting_link": "https://us05web.zoom.us/j/82921504820?pwd=1DYxQczginCdD0CrXZ09tJPQSbdPnF.1",
     "meeting_password": "T2T3r6",
     "country": "Canada",
-    "phone": null
+    "phone": null,
+    "end_time": null,
+    "status": "success"
   },
   {
     "id": 14,
@@ -194,7 +207,9 @@
     "meeting_link": "https://us05web.zoom.us/j/83363481787?pwd=EWWl9LQdRvh2DYSjTqbxBpst6Yl8Yf.1",
     "meeting_password": "9SrARC",
     "country": "UK",
-    "phone": null
+    "phone": null,
+    "end_time": null,
+    "status": "didnt-attend"
   },
   {
     "id": 15,
@@ -214,7 +229,7 @@
     "id": 16,
     "name": "Raymond Fernandes",
     "email": "rayferns@hotmail.com",
-    "country": null,
+    "country": "UK",
     "date": "2026-11-23",
     "time": "19:00",
     "timezone": "Asia/Tokyo",
@@ -222,7 +237,9 @@
     "linkedin": "https://www.linkedin.com/in/Raymond Fernandes",
     "github": "https://github.com/rayferns",
     "meeting_link": "https://us05web.zoom.us/j/87635261597?pwd=oc0PNCmjUFnR4Oour2ya3B5TetUfvB.1",
-    "meeting_password": "VVrJi2"
+    "meeting_password": "VVrJi2",
+    "end_time": null,
+    "status": "didnt-attend"
   },
   {
     "id": 17,
@@ -235,6 +252,66 @@
     "phone": null,
     "linkedin": null,
     "github": "https://github.com/thrawn01",
+    "meeting_link": null,
+    "meeting_password": null
+  },
+  {
+    "id": 18,
+    "name": "Isaac Guzman Mora",
+    "email": "guzmanisaac2005@outlook.com",
+    "country": "Colombia",
+    "date": "2026-11-25",
+    "time": "09:00",
+    "end_time": null,
+    "timezone": "Asia/Tokyo",
+    "phone": null,
+    "linkedin": null,
+    "github": "https://github.com/Isaac-G17",
+    "meeting_link": "https://us05web.zoom.us/j/81435059015?pwd=a6t79rDFpAbLjM6gpOo779wERZz5YR.1",
+    "meeting_password": "MzR5zv"
+  },
+  {
+    "id": 19,
+    "name": "Ikenna Ifekaonwu",
+    "email": "ikenna.ifekaonwu@gmail.com",
+    "country": "Chicago, Illinois, US",
+    "date": "2026-11-27",
+    "time": "09:00",
+    "end_time": null,
+    "timezone": "Asia/Tokyo",
+    "phone": null,
+    "linkedin": "https://www.linkedin.com/in/ikenna-ifekaonwu",
+    "github": "https://github.com/McIkenna",
+    "meeting_link": "https://us05web.zoom.us/j/89937538794?pwd=vmnBMk0BT6NPWaHLYAEoJfNUjgVxs6.1",
+    "meeting_password": "UT33Ui"
+  },
+  {
+    "id": 20,
+    "name": "Paul Rohit Jangareddi",
+    "email": "paul.jangareddi@mailmywork.com",
+    "country": "New York, US",
+    "date": "2026-11-24",
+    "time": "14:00",
+    "end_time": null,
+    "timezone": "Asia/Tokyo",
+    "phone": null,
+    "linkedin": "https://www.linkedin.com/in/paulrohitjangareddi/",
+    "github": "https://github.com/paulrohit96",
+    "meeting_link": "https://us05web.zoom.us/j/89213745084?pwd=OURTgTtf5e8pohe6E3sDL9QOq0zmpV.1",
+    "meeting_password": "VPU20b"
+  },
+  {
+    "id": 21,
+    "name": "Claudia Estupiñán Forero",
+    "email": "claudiaeforero@hotmail.com",
+    "country": "Bogotá, Colombia",
+    "date": null,
+    "time": null,
+    "end_time": null,
+    "timezone": null,
+    "phone": null,
+    "linkedin": null,
+    "github": "https://github.com/claudiainbytes",
     "meeting_link": null,
     "meeting_password": null
   }

@@ -592,6 +592,33 @@ header {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
 }
+
+.event-status-success {
+    background: #ceead6;
+    border-left-color: #188038;
+    color: #137333;
+}
+.event-status-success:hover { background: #b7dfbd; }
+.event-status-failed {
+    background: #fad2cf;
+    border-left-color: #d93025;
+    color: #b31412;
+}
+.event-status-failed:hover { background: #f6aea8; }
+.status-badge.success { background: #ceead6; color: #137333; }
+.status-badge.failed { background: #fad2cf; color: #b31412; }
+
+.user-status.status-success { background: #ceead6; color: #137333; }
+.user-status.status-failed { background: #fad2cf; color: #b31412; }
+
+.event-status-didnt-attend {
+    background: #e8eaed;
+    border-left-color: #80868b;
+    color: #5f6368;
+}
+.event-status-didnt-attend:hover { background: #dadce0; }
+.status-badge.didnt-attend { background: #e8eaed; color: #5f6368; }
+.user-status.status-didnt-attend { background: #e8eaed; color: #5f6368; }
 </style>
 </head>
 
@@ -691,6 +718,14 @@ header {
             <label><span>Resume</span><input id="interviewResume" type="url"></label>
             <label><span>Meeting Link</span><input id="interviewMeetingLink" type="url"></label>
             <label><span>Interviewers</span><input id="interviewInterviewers"></label>
+            <label><span>Status</span>
+                <select id="interviewStatus">
+                    <option value="">Not set</option>
+                    <option value="success">Success</option>
+                    <option value="failed">Failed</option>
+                    <option value="didnt-attend">Didn't Attend</option>
+                </select>
+            </label>
         </div>
         <div class="form-actions">
             <button type="button" onclick="closeScheduleForm()">Cancel</button>
@@ -734,6 +769,14 @@ header {
             <label><span>GitHub</span><input id="meetingGithub" type="url"></label>
             <label><span>Meeting Link</span><input id="meetingLink" type="url"></label>
             <label><span>Meeting Password</span><input id="meetingPassword" type="url"></label>
+            <label><span>Status</span>
+                <select id="meetingStatus">
+                    <option value="">Not set</option>
+                    <option value="success">Success</option>
+                    <option value="failed">Failed</option>
+                    <option value="didnt-attend">Didn't Attend</option>
+                </select>
+            </label>
         </div>
         <div class="form-actions">
             <button type="button" onclick="closeScheduleForm()">Cancel</button>
@@ -1013,7 +1056,15 @@ function renderUserList() {
         status.textContent = isScheduled
             ? `${person.displayDate || person.date} · ${formatTimeRange(person.displayTime || person.time, person.displayEndTime || person.end_time)} (${person.displayTimezone || "JST"})`
             : "Unscheduled";
-        if (!isScheduled) status.classList.add("unscheduled");
+        if (isScheduled) {
+            const scheduleStatus = getScheduleStatus(person);
+            if (scheduleStatus) {
+                status.classList.add(`status-${scheduleStatus}`);
+                status.textContent += ` · ${getStatusLabel(scheduleStatus)}`;
+            }
+        } else {
+            status.classList.add("unscheduled");
+        }
 
         button.append(name, email, status);
         button.onclick = () => {
@@ -1105,6 +1156,12 @@ function renderCalendar() {
             const eventElement = document.createElement("div");
             eventElement.className = "event";
 
+            const scheduleStatus = getScheduleStatus(event);
+            if (scheduleStatus) {
+                eventElement.classList.add(`event-status-${scheduleStatus}`);
+                eventElement.title = getStatusLabel(scheduleStatus);
+            }
+
             const time = document.createElement("div");
             time.className = "event-time";
             time.textContent = formatTimeRange(event.displayTime || event.time, event.displayEndTime || event.end_time);
@@ -1170,6 +1227,7 @@ function showDetails(event) {
     addText("Meeting Password", event.meeting_password);
     addText("Recruiting Chat / Title", event.title);
     addText("Interviewers", event.interviewers);
+    addText("Status", getScheduleStatus(event) ? getStatusLabel(getScheduleStatus(event)) : null);
 
     ["linkedin", "github", "meeting_link", "job_description", "resume"].forEach(key => {
         if (!event[key]) return;
@@ -1274,6 +1332,7 @@ async function openScheduleForm(meeting = null) {
         document.getElementById("interviewResume").value = meeting?.resume ?? "";
         document.getElementById("interviewMeetingLink").value = meeting?.meeting_link ?? "";
         document.getElementById("interviewInterviewers").value = meeting?.interviewers ?? "";
+        document.getElementById("interviewStatus").value = meeting?.status ?? "";
         setTimeout(() => document.getElementById("interviewName").focus(), 0);
     } else {
         document.getElementById("meetingModal").style.display = "flex";
@@ -1291,6 +1350,7 @@ async function openScheduleForm(meeting = null) {
         document.getElementById("meetingGithub").value = meeting?.github ?? "";
         document.getElementById("meetingLink").value = meeting?.meeting_link ?? "";
         document.getElementById("meetingPassword").value = meeting?.meeting_password ?? "";
+        document.getElementById("meetingStatus").value = meeting?.status ?? "";
         setTimeout(() => document.getElementById("meetingName").focus(), 0);
     }
 }
@@ -1324,7 +1384,8 @@ async function saveInterview() {
         job_description: document.getElementById("interviewJobDescription").value.trim() || null,
         resume: document.getElementById("interviewResume").value.trim() || null,
         meeting_link: document.getElementById("interviewMeetingLink").value.trim() || null,
-        interviewers: document.getElementById("interviewInterviewers").value.trim() || null
+        interviewers: document.getElementById("interviewInterviewers").value.trim() || null,
+        status: document.getElementById("interviewStatus").value || null
     });
 
     await saveScheduleItem("interviews", id, interview);
@@ -1344,7 +1405,8 @@ async function saveDeveloperMeeting() {
         linkedin: document.getElementById("meetingLinkedin").value.trim() || null,
         github: document.getElementById("meetingGithub").value.trim() || null,
         meeting_link: document.getElementById("meetingLink").value.trim() || null,
-        meeting_password: document.getElementById("meetingPassword").value.trim() || null
+        meeting_password: document.getElementById("meetingPassword").value.trim() || null,
+        status: document.getElementById("meetingStatus").value || null
     });
 
     await saveScheduleItem("meetings", id, meeting);
@@ -1399,6 +1461,15 @@ async function deleteSchedule(id) {
     } catch (error) {
         showStatus(error.message, "error");
     }
+}
+
+function getScheduleStatus(item) {
+    const status = typeof item?.status === "string" ? item.status.trim().toLowerCase() : "";
+    return status === "success" || status === "failed" || status === "didnt-attend" ? status : null;
+}
+
+function getStatusLabel(status) {
+    return status === "success" ? "Success" : status === "failed" ? "Failed" : status === "didnt-attend" ? "Didn't Attend" : "Not set";
 }
 
 // Render immediately from the built-in data, then refresh from meetings.json.

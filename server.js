@@ -92,6 +92,9 @@ function validateMeeting(meeting) {
     if (meeting.time && meeting.end_time && meeting.end_time <= meeting.time) {
         return "End time must be after start time.";
     }
+    if (meeting.status !== null && meeting.status !== undefined && !["success", "failed", "didnt-attend"].includes(meeting.status)) {
+        return "Status must be success, failed, or didnt-attend.";
+    }
     return null;
 }
 
@@ -146,6 +149,9 @@ function validateInterview(interview) {
     }
     if (interview.time && interview.end_time && interview.end_time <= interview.time) {
         return "End time must be after start time.";
+    }
+    if (interview.status !== null && interview.status !== undefined && !["success", "failed", "didnt-attend"].includes(interview.status)) {
+        return "Status must be success, failed, or didnt-attend.";
     }
     return null;
 }
